@@ -7,7 +7,7 @@ define( function ( require, exports, module ) {
     var kity = require( "kity" ),
         kfUtils = require( "base/utils" ),
         CONF = require( "sysconf" ),
-        CURSOR_CHAR = CONF.cursorCharacter
+        CURSOR_CHAR = CONF.cursorCharacter,
         InputFilter = require( "control/input-filter" ),
         KEY_CODE = {
             LEFT: 37,
