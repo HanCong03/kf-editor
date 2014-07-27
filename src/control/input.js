@@ -53,7 +53,16 @@ define( function ( require, exports, module ) {
 
         initCommands: function () {
 
+            this.kfEditor.registerCommand( "reset", this, this.reset );
             this.kfEditor.registerCommand( "focus", this, this.focus );
+
+        },
+
+        reset: function () {
+
+            this.kfEditor.requestService( "render.draw", "\\placeholder" );
+            this.kfEditor.requestService( "ui.update.canvas.view" );
+            this.kfEditor.requestService( "control.select.all" );
 
         },
 
@@ -226,6 +235,12 @@ define( function ( require, exports, module ) {
 
             kfUtils.addEvent( this.inputBox, "focus", function ( e ) {
 
+                if ( !this.latexInput ) {
+                    this.latexInput = _self.kfEditor.requestService( "ui.get.latex.input" );
+                }
+
+                _self.updateLatexMode( false );
+                _self.latexInput.value = this.value.replace( CURSOR_CHAR, '' ).replace( CURSOR_CHAR, '' );
                 _self.kfEditor.requestService( "ui.toolbar.enable" );
 
                 if ( this.isTrusted ) {
