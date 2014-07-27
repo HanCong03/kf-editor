@@ -29,7 +29,25 @@
 
 .kf-editor-canvas-container {
     width: 100%;
+    height: 70%;
+}
+
+.kf-editor-latex-area {
+    width: 100%;
+    margin: 0 auto;
+    height: 30%;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.kf-editor-latex-input {
+    border: 0;
+    text-align: center;
+    width: 90%;
     height: 100%;
+    margin-left: 5%;
+    font-size: 18px;
+    outline: none;
+    background: transparent;
 }
 
 .kf-editor-input-box {

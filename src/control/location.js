@@ -71,6 +71,7 @@ define( function ( require, exports, module ) {
 
                 e.preventDefault();
 
+                _self.kfEditor.requestService( "control.update.latex.mode", false );
                 _self.updateCursorInfo( e );
                 _self.kfEditor.requestService( "control.update.input" );
                 _self.reselect();

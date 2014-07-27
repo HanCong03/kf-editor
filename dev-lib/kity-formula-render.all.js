@@ -3433,7 +3433,7 @@ _p[5] = {
                     }
                     var data = FontManager.getCharacterValue(input, fontFamily);
                     if (!data) {
-                        console.error("missing code: " + input);
+//                        console.error("missing code: " + input);
                         return "";
                     }
                     return data;

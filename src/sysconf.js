@@ -19,7 +19,9 @@ define( function () {
         scrollbar: {
             padding: 5,
             step: 150
-        }
+        },
+
+        enableLatex: true
 
     };
 

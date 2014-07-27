@@ -6,6 +6,8 @@ define( function ( require, exports, module ) {
 
     var kity = require( "kity" ),
         kfUtils = require( "base/utils" ),
+        CONF = require( "sysconf" ),
+        CURSOR_CHAR = CONF.cursorCharacter
         InputFilter = require( "control/input-filter" ),
         KEY_CODE = {
             LEFT: 37,
@@ -21,7 +23,9 @@ define( function ( require, exports, module ) {
 
             this.parentComponent = parentComponent;
             this.kfEditor = kfEditor;
+            this.latexMode = false;
 
+            this.latexInput = null;
             this.inputBox = this.createInputBox();
 
             this.initServices();
@@ -39,6 +43,10 @@ define( function ( require, exports, module ) {
 
             this.kfEditor.registerService( "control.insert.string", this, {
                 insertStr: this.insertStr
+            } );
+
+            this.kfEditor.registerService( "control.update.latex.mode", this, {
+                updateLatexMode: this.updateLatexMode
             } );
 
         },
@@ -91,6 +99,10 @@ define( function ( require, exports, module ) {
 
         },
 
+        updateLatexMode: function ( mode ) {
+            this.latexMode = !!mode;
+        },
+
         setUntrusted: function () {
             this.inputBox.isTrusted = false;
         },
@@ -101,7 +113,8 @@ define( function ( require, exports, module ) {
 
         updateInput: function () {
 
-            var latexInfo = this.kfEditor.requestService( "syntax.serialization" );
+            var latexInfo = this.kfEditor.requestService( "syntax.serialization" ),
+                latexMode = this.latexMode;
 
             this.setUntrusted();
             this.inputBox.value = latexInfo.str;
@@ -109,6 +122,9 @@ define( function ( require, exports, module ) {
             this.inputBox.selectionEnd = latexInfo.endOffset;
             this.inputBox.focus();
             this.setTrusted();
+
+            this.latexMode = latexMode;
+            this.updateLatex();
 
         },
 
@@ -124,6 +140,20 @@ define( function ( require, exports, module ) {
             this.updateInput();
 
             this.kfEditor.requestService( "ui.update.canvas.view" );
+
+        },
+
+        updateLatex: function () {
+
+            if ( !CONF.enableLatex ) {
+                return;
+            }
+
+            this.latexInput.value = this.inputBox.value.replace( CURSOR_CHAR, '' ).replace( CURSOR_CHAR, '' );
+
+            if ( this.latexMode ) {
+                this.latexInput.focus();
+            }
 
         },
 
@@ -203,6 +233,36 @@ define( function ( require, exports, module ) {
                 }
 
             } );
+
+            if ( CONF.enableLatex ) {
+
+                if ( !this.latexInput ) {
+                    this.latexInput = _self.kfEditor.requestService( "ui.get.latex.input" );
+                }
+
+                kfUtils.addEvent( this.latexInput, "focus", function ( e ) {
+
+                    _self.kfEditor.requestService( "ui.toolbar.enable" );
+                    _self.updateLatexMode( true );
+
+                } );
+
+                kfUtils.addEvent( this.latexInput, "blur", function ( e ) {
+
+                    _self.updateLatexMode( false );
+                    _self.kfEditor.requestService( "ui.toolbar.disable" );
+                    _self.kfEditor.requestService( "ui.toolbar.close" );
+
+                } );
+
+                kfUtils.addEvent( this.latexInput, "input", function ( e ) {
+
+                    _self.kfEditor.requestService( "render.draw", this.value );
+                    _self.kfEditor.requestService( "ui.update.canvas.view" );
+
+                } );
+
+            }
 
             // 粘贴过滤
             kfUtils.addEvent( this.inputBox, "paste", function ( e ) {
@@ -304,6 +364,7 @@ define( function ( require, exports, module ) {
         processingInput: function () {
 
             this.restruct( this.inputBox.value );
+            this.latexInput.value = this.inputBox.value.replace( CURSOR_CHAR, '' ).replace( CURSOR_CHAR, '' );
             this.kfEditor.requestService( "ui.update.canvas.view" );
 
         },

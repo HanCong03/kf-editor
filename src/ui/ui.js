@@ -9,6 +9,8 @@ define( function ( require ) {
         // UiUitls
         $$ = require( "ui/ui-impl/ui-utils" ),
 
+        enableTatex = require( "sysconf" ).enableLatex,
+
         Utils = require( "base/utils" ),
 
         VIEW_STATE = require( "ui/def" ).VIEW_STATE,
@@ -38,6 +40,7 @@ define( function ( require ) {
 
                 this.canvasRect = null;
                 this.viewState = VIEW_STATE.NO_OVERFLOW;
+                this.latexInput = null;
 
                 this.kfEditor = kfEditor;
 
@@ -49,6 +52,13 @@ define( function ( require ) {
 
                 this.toolbarWrap.appendChild( this.toolbarContainer );
                 this.container.appendChild( this.toolbarWrap );
+
+                if ( enableTatex ) {
+                    this.latexArea = creatLatexArea( currentDocument );
+                    this.latexInput = this.latexArea.firstChild;
+                    this.editArea.appendChild( this.latexArea );
+                }
+
                 this.editArea.appendChild( this.canvasContainer );
                 this.container.appendChild( this.editArea );
                 this.container.appendChild( this.scrollbarContainer );
@@ -98,6 +108,10 @@ define( function ( require ) {
 
                 this.kfEditor.registerService( "ui.get.canvas.container", this, {
                     getCanvasContainer: this.getCanvasContainer
+                } );
+
+                this.kfEditor.registerService( "ui.get.latex.input", this, {
+                    getLatexInput: this.getLatexInput
                 } );
 
                 this.kfEditor.registerService( "ui.update.canvas.view", this, {
@@ -152,6 +166,10 @@ define( function ( require ) {
 
                 Utils.trigger( this.canvasContainer, type );
 
+            },
+
+            getLatexInput: function () {
+                return this.latexInput;
             },
 
             // 更新画布视窗， 决定是否出现滚动条
@@ -237,6 +255,15 @@ define( function ( require ) {
     function createScrollbarContainer ( doc ) {
         var container = doc.createElement( "div" );
         container.className = "kf-editor-edit-scrollbar";
+        return container;
+    }
+
+    function creatLatexArea ( doc ) {
+        var container = doc.createElement( "div" );
+        container.className = "kf-editor-latex-area";
+
+        container.innerHTML = '<input type="text" class="kf-editor-latex-input">';
+
         return container;
     }
 
