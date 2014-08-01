@@ -173,6 +173,7 @@ define( function ( require ) {
 
                 this.kfEditor.registerCommand( "render", this, function ( str ) {
                     this.render( str );
+                    this.kfEditor.requestService( "control.set.source", str );
                     this.kfEditor.requestService( "ui.update.canvas.view" );
                 } );
 

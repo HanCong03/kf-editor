@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * Kity Formula Editor - v1.0.0 - 2014-07-30
+ * Kity Formula Editor - v1.0.0 - 2014-08-01
  * https://github.com/kitygraph/formula
  * GitHub: https://github.com/kitygraph/formula.git 
  * Copyright (c) 2014 Baidu Kity Group; Licensed MIT
@@ -283,7 +283,7 @@ _p[6] = {
  */
 _p[7] = {
     value: function(require, exports, module) {
-        var kity = _p.r(20), kfUtils = _p.r(4), InputFilter = _p.r(6), KEY_CODE = {
+        var kity = _p.r(20), kfUtils = _p.r(4), CONF = _p.r(29), CURSOR_CHAR = CONF.cursorCharacter, InputFilter = _p.r(6), KEY_CODE = {
             LEFT: 37,
             RIGHT: 39,
             DELETE: 8,
@@ -294,6 +294,8 @@ _p[7] = {
             constructor: function(parentComponent, kfEditor) {
                 this.parentComponent = parentComponent;
                 this.kfEditor = kfEditor;
+                this.latexMode = false;
+                this.latexInput = null;
                 this.inputBox = this.createInputBox();
                 this.initServices();
                 this.initCommands();
@@ -306,9 +308,22 @@ _p[7] = {
                 this.kfEditor.registerService("control.insert.string", this, {
                     insertStr: this.insertStr
                 });
+                this.kfEditor.registerService("control.update.latex.mode", this, {
+                    updateLatexMode: this.updateLatexMode
+                });
+                this.kfEditor.registerService("control.set.source", this, {
+                    setSource: this.setSource
+                });
             },
             initCommands: function() {
+                this.kfEditor.registerCommand("reset", this, this.reset);
                 this.kfEditor.registerCommand("focus", this, this.focus);
+                this.kfEditor.registerCommand("get.source", this, this.getSource);
+            },
+            reset: function() {
+                this.kfEditor.requestService("render.draw", "\\placeholder");
+                this.kfEditor.requestService("ui.update.canvas.view");
+                this.kfEditor.requestService("control.select.all");
             },
             createInputBox: function() {
                 var editorContainer = this.kfEditor.getContainer(), box = this.kfEditor.getDocument().createElement("input");
@@ -334,6 +349,15 @@ _p[7] = {
                 }
                 this.kfEditor.requestService("control.reselect");
             },
+            getSource: function() {
+                return this.latexInput.value.replace(/\\placeholder/g, "");
+            },
+            setSource: function(value) {
+                this.latexInput.value = value;
+            },
+            updateLatexMode: function(mode) {
+                this.latexMode = !!mode;
+            },
             setUntrusted: function() {
                 this.inputBox.isTrusted = false;
             },
@@ -341,13 +365,15 @@ _p[7] = {
                 this.inputBox.isTrusted = true;
             },
             updateInput: function() {
-                var latexInfo = this.kfEditor.requestService("syntax.serialization");
+                var latexInfo = this.kfEditor.requestService("syntax.serialization"), latexMode = this.latexMode;
                 this.setUntrusted();
                 this.inputBox.value = latexInfo.str;
                 this.inputBox.selectionStart = latexInfo.startOffset;
                 this.inputBox.selectionEnd = latexInfo.endOffset;
                 this.inputBox.focus();
                 this.setTrusted();
+                this.latexMode = latexMode;
+                this.updateLatex();
             },
             insertStr: function(str) {
                 var latexInfo = this.kfEditor.requestService("syntax.serialization"), originString = latexInfo.str;
@@ -356,6 +382,15 @@ _p[7] = {
                 this.restruct(originString);
                 this.updateInput();
                 this.kfEditor.requestService("ui.update.canvas.view");
+            },
+            updateLatex: function() {
+                if (!CONF.enableLatex) {
+                    return;
+                }
+                this.latexInput.value = this.inputBox.value.replace(CURSOR_CHAR, "").replace(CURSOR_CHAR, "");
+                if (this.latexMode) {
+                    this.latexInput.focus();
+                }
             },
             initEvent: function() {
                 var _self = this;
@@ -407,11 +442,34 @@ _p[7] = {
                     _self.kfEditor.requestService("render.clear.select");
                 });
                 kfUtils.addEvent(this.inputBox, "focus", function(e) {
+                    if (!this.latexInput) {
+                        this.latexInput = _self.kfEditor.requestService("ui.get.latex.input");
+                    }
+                    _self.updateLatexMode(false);
+                    _self.latexInput.value = this.value.replace(CURSOR_CHAR, "").replace(CURSOR_CHAR, "");
                     _self.kfEditor.requestService("ui.toolbar.enable");
                     if (this.isTrusted) {
                         _self.kfEditor.requestService("control.reselect");
                     }
                 });
+                if (CONF.enableLatex) {
+                    if (!this.latexInput) {
+                        this.latexInput = _self.kfEditor.requestService("ui.get.latex.input");
+                    }
+                    kfUtils.addEvent(this.latexInput, "focus", function(e) {
+                        _self.kfEditor.requestService("ui.toolbar.enable");
+                        _self.updateLatexMode(true);
+                    });
+                    kfUtils.addEvent(this.latexInput, "blur", function(e) {
+                        _self.updateLatexMode(false);
+                        _self.kfEditor.requestService("ui.toolbar.disable");
+                        _self.kfEditor.requestService("ui.toolbar.close");
+                    });
+                    kfUtils.addEvent(this.latexInput, "input", function(e) {
+                        _self.kfEditor.requestService("render.draw", this.value);
+                        _self.kfEditor.requestService("ui.update.canvas.view");
+                    });
+                }
                 // 粘贴过滤
                 kfUtils.addEvent(this.inputBox, "paste", function(e) {
                     e.preventDefault();
@@ -479,6 +537,7 @@ _p[7] = {
             },
             processingInput: function() {
                 this.restruct(this.inputBox.value);
+                this.latexInput.value = this.inputBox.value.replace(CURSOR_CHAR, "").replace(CURSOR_CHAR, "");
                 this.kfEditor.requestService("ui.update.canvas.view");
             },
             // 根据给定的字符串重新进行构造公式
@@ -566,6 +625,7 @@ _p[9] = {
                 var eventServiceObject = this.kfEditor.request("ui.canvas.container.event"), _self = this;
                 eventServiceObject.on("mousedown", function(e) {
                     e.preventDefault();
+                    _self.kfEditor.requestService("control.update.latex.mode", false);
                     _self.updateCursorInfo(e);
                     _self.kfEditor.requestService("control.update.input");
                     _self.reselect();
@@ -1815,6 +1875,7 @@ _p[25] = {
             initCommands: function() {
                 this.kfEditor.registerCommand("render", this, function(str) {
                     this.render(str);
+                    this.kfEditor.requestService("control.set.source", str);
                     this.kfEditor.requestService("ui.update.canvas.view");
                 });
                 this.kfEditor.registerCommand("getPaper", this, this.getPaper);
@@ -2801,7 +2862,8 @@ _p[29] = {
             scrollbar: {
                 padding: 5,
                 step: 150
-            }
+            },
+            enableLatex: true
         };
     }
 };
@@ -4762,685 +4824,6 @@ _p[33] = {
  */
 _p[34] = {
     value: function(require) {
-        var UI_ELE_TYPE = _p.r(41), BOX_TYPE = _p.r(40), kity = _p.r(20);
-        var config = [ {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "预设<br/>",
-                    className: "yushe-btn",
-                    icon: "assets/images/toolbar/button/fx.png",
-                    iconSize: {
-                        w: 40
-                    }
-                },
-                box: {
-                    width: 367,
-                    group: [ {
-                        title: "预设公式",
-                        items: [ {
-                            title: "预设公式",
-                            content: [ {
-                                label: "二次公式",
-                                item: {
-                                    show: "assets/images/toolbar/ys/1.png",
-                                    val: "x=\\frac {-b\\pm\\sqrt {b^2-4ac}}{2a}"
-                                }
-                            }, {
-                                label: "二项式定理",
-                                item: {
-                                    show: "assets/images/toolbar/ys/2.png",
-                                    val: "{\\left(x+a\\right)}^2=\\sum^n_{k=0}{\\left(^n_k\\right)x^ka^{n-k}}"
-                                }
-                            }, {
-                                label: "勾股定理",
-                                item: {
-                                    show: "assets/images/toolbar/ys/3.png",
-                                    val: "a^2+b^2=c^2"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DELIMITER
-        }, {
-            type: UI_ELE_TYPE.AREA,
-            options: {
-                box: {
-                    fixOffset: true,
-                    width: 527,
-                    type: BOX_TYPE.OVERLAP,
-                    group: [ {
-                        title: "基础数学",
-                        items: []
-                    }, {
-                        title: "希腊字母",
-                        items: []
-                    }, {
-                        title: "求反关系运算符",
-                        items: []
-                    }, {
-                        title: "字母类符号",
-                        items: []
-                    }, {
-                        title: "箭头",
-                        items: []
-                    }, {
-                        title: "手写体",
-                        items: []
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DELIMITER
-        }, {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "分数<br/>",
-                    icon: "assets/images/toolbar/button/frac.png"
-                },
-                box: {
-                    width: 332,
-                    group: [ {
-                        title: "分数",
-                        items: [ {
-                            title: "分数",
-                            content: [ {
-                                item: {
-                                    show: "assets/images/toolbar/frac/1.png",
-                                    val: "\\frac \\placeholder\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/frac/2.png",
-                                    val: "{\\placeholder/\\placeholder}"
-                                }
-                            } ]
-                        }, {
-                            title: "常用分数",
-                            content: [ {
-                                item: {
-                                    show: "assets/images/toolbar/frac/c1.png",
-                                    val: "\\frac {dy}{dx}"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/frac/c2.png",
-                                    val: "\\frac {\\Delta y}{\\Delta x}"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/frac/c4.png",
-                                    val: "\\frac {\\delta y}{\\delta x}"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/frac/c5.png",
-                                    val: "\\frac \\pi 2"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "上下标<br/>",
-                    icon: "assets/images/toolbar/button/script.png"
-                },
-                box: {
-                    width: 332,
-                    group: [ {
-                        title: "上标和下标",
-                        items: [ {
-                            title: "上标和下标",
-                            content: [ {
-                                item: {
-                                    show: "assets/images/toolbar/script/1.png",
-                                    val: "\\placeholder^\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/script/2.png",
-                                    val: "\\placeholder_\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/script/3.png",
-                                    val: "\\placeholder^\\placeholder_\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/script/4.png",
-                                    val: "{^\\placeholder_\\placeholder\\placeholder}"
-                                }
-                            } ]
-                        }, {
-                            title: "常用的上标和下标",
-                            content: [ {
-                                item: {
-                                    show: "assets/images/toolbar/script/c1.png",
-                                    val: "e^{-i\\omega t}"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/script/c2.png",
-                                    val: "x^2"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/script/c3.png",
-                                    val: "{}^n_1Y"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "根式<br/>",
-                    icon: "assets/images/toolbar/button/sqrt.png"
-                },
-                box: {
-                    width: 342,
-                    group: [ {
-                        title: "根式",
-                        items: [ {
-                            title: "根式",
-                            content: [ {
-                                item: {
-                                    show: "assets/images/toolbar/sqrt/1.png",
-                                    val: "\\sqrt \\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/sqrt/2.png",
-                                    val: "\\sqrt [\\placeholder] \\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/sqrt/3.png",
-                                    val: "\\sqrt [2] \\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/sqrt/4.png",
-                                    val: "\\sqrt [3] \\placeholder"
-                                }
-                            } ]
-                        }, {
-                            title: "常用根式",
-                            content: [ {
-                                item: {
-                                    show: "assets/images/toolbar/sqrt/c1.png",
-                                    val: "\\frac {-b\\pm\\sqrt{b^2-4ac}}{2a}"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/sqrt/c2.png",
-                                    val: "\\sqrt {a^2+b^2}"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "积分<br/>",
-                    icon: "assets/images/toolbar/button/int.png"
-                },
-                box: {
-                    width: 332,
-                    group: [ {
-                        title: "积分",
-                        items: [ {
-                            title: "积分",
-                            content: [ {
-                                item: {
-                                    show: "assets/images/toolbar/int/1.png",
-                                    val: "\\int \\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/int/2.png",
-                                    val: "\\int^\\placeholder_\\placeholder\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/int/3.png",
-                                    val: "\\iint\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/int/4.png",
-                                    val: "\\iint^\\placeholder_\\placeholder\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/int/5.png",
-                                    val: "\\iiint\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/int/6.png",
-                                    val: "\\iiint^\\placeholder_\\placeholder\\placeholder"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "大型<br/>运算符",
-                    icon: "assets/images/toolbar/button/sum.png"
-                },
-                box: {
-                    width: 332,
-                    group: [ {
-                        title: "求和",
-                        items: [ {
-                            title: "求和",
-                            content: [ {
-                                item: {
-                                    show: "assets/images/toolbar/large/1.png",
-                                    val: "\\sum\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/large/2.png",
-                                    val: "\\sum^\\placeholder_\\placeholder\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/large/3.png",
-                                    val: "\\sum_\\placeholder\\placeholder"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "括号<br/>",
-                    icon: "assets/images/toolbar/button/brackets.png"
-                },
-                box: {
-                    width: 332,
-                    group: [ {
-                        title: "方括号",
-                        items: [ {
-                            title: "方括号",
-                            content: [ {
-                                item: {
-                                    show: "assets/images/toolbar/brackets/1.png",
-                                    val: "\\left(\\placeholder\\right)"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/brackets/2.png",
-                                    val: "\\left[\\placeholder\\right]"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/brackets/3.png",
-                                    val: "\\left\\{\\placeholder\\right\\}"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/brackets/4.png",
-                                    val: "\\left|\\placeholder\\right|"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "函数<br/>",
-                    icon: "assets/images/toolbar/button/sin.png"
-                },
-                box: {
-                    width: 340,
-                    group: [ {
-                        title: "函数",
-                        items: [ {
-                            title: "三角函数",
-                            content: [ {
-                                item: {
-                                    show: "assets/images/toolbar/func/1.png",
-                                    val: "\\sin\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/func/2.png",
-                                    val: "\\cos\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/func/3.png",
-                                    val: "\\tan\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/func/4.png",
-                                    val: "\\csc\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/func/5.png",
-                                    val: "\\sec\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/func/6.png",
-                                    val: "\\cot\\placeholder"
-                                }
-                            } ]
-                        }, {
-                            title: "常用函数",
-                            content: [ {
-                                item: {
-                                    show: "assets/images/toolbar/func/c1.png",
-                                    val: "\\sin\\theta"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/func/c2.png",
-                                    val: "\\sin{2x}"
-                                }
-                            }, {
-                                item: {
-                                    show: "assets/images/toolbar/func/c3.png",
-                                    val: "\\tan\\theta=\\frac {\\sin\\theta}{\\cos\\theta}"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        } ];
-        // 初始化基础数学
-        (function() {
-            var list = [ "pm", "infty", {
-                key: "=",
-                img: "eq"
-            }, "sim", "times", "div", {
-                key: "!",
-                img: "tanhao"
-            }, {
-                key: "<",
-                img: "lt"
-            }, "ll", {
-                key: ">",
-                img: "gt"
-            }, "gg", "leq", "geq", "mp", "cong", "equiv", "propto", "approx", "forall", "partial", "surd", "cup", "cap", "varnothing", {
-                key: "%",
-                img: "baifenhao"
-            }, "circ", "exists", "nexists", "in", "ni", "gets", "uparrow", "to", "downarrow", "leftrightarrow", "therefore", "because", {
-                key: "+",
-                img: "plus"
-            }, {
-                key: "-",
-                img: "minus"
-            }, "neg", "ast", "cdot", "vdots", "ddots", "aleph", "beth", "blacksquare" ], configList = config[2].options.box.group[0].items;
-            configList.push({
-                title: "基础数学",
-                content: getContents({
-                    path: "assets/images/toolbar/char/math/",
-                    values: list
-                })
-            });
-        })();
-        // 初始化希腊字符配置
-        (function() {
-            var greekList = [ {
-                title: "小写",
-                values: [ "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega" ]
-            }, {
-                title: "大写",
-                values: [ "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta", "Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho", "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega" ]
-            }, {
-                title: "变体",
-                values: [ "digamma", "varepsilon", "varkappa", "varphi", "varpi", "varrho", "varsigma", "vartheta" ]
-            } ], greekConfigList = config[2].options.box.group[1].items;
-            // 小写处理
-            greekConfigList.push({
-                title: greekList[0].title,
-                content: getContents({
-                    path: "assets/images/toolbar/char/greek/lower/",
-                    values: greekList[0].values
-                })
-            });
-            // 大写处理
-            greekConfigList.push({
-                title: greekList[1].title,
-                content: getContents({
-                    path: "assets/images/toolbar/char/greek/upper/",
-                    values: greekList[1].values
-                })
-            });
-            // 变体处理
-            greekConfigList.push({
-                title: greekList[2].title,
-                content: getContents({
-                    path: "assets/images/toolbar/char/greek/misc/",
-                    values: greekList[2].values
-                })
-            });
-        })();
-        // 初始化求反运算符
-        (function() {
-            var greekList = [ {
-                title: "求反关系运算符",
-                values: [ "neq", "nless", "ngtr", "nleq", "ngeq", "nsim", "lneqq", "gneqq", "nprec", "nsucc", "notin", "nsubseteq", "nsupseteq", "subsetneq", "supsetneq", "lnsim", "gnsim", "precnsim", "succnsim", "ntriangleleft", "ntriangleright", "ntrianglelefteq", "ntrianglerighteq", "nmid", "nparallel", "nvdash", {
-                    key: "\\nVdash",
-                    img: "nvdash-1"
-                }, {
-                    key: "\\nvDash",
-                    img: "nvdash-2"
-                }, {
-                    key: "\\nVDash",
-                    img: "nvdash-3"
-                }, "nexists" ]
-            } ], greekConfigList = config[2].options.box.group[2].items;
-            greekConfigList.push({
-                title: greekList[0].title,
-                content: getContents({
-                    path: "assets/images/toolbar/char/not/",
-                    values: greekList[0].values
-                })
-            });
-        })();
-        // 初始字母类符号
-        (function() {
-            var list = [ "aleph", "beth", "daleth", "gimel", "complement", "ell", "eth", "hbar", "hslash", "mho", "partial", "wp", "circledS", "Bbbk", "Finv", "Game", "Im", "Re" ], configList = config[2].options.box.group[3].items;
-            configList.push({
-                title: "字母类符号",
-                content: getContents({
-                    path: "assets/images/toolbar/alphabetic/",
-                    values: list
-                })
-            });
-        })();
-        (function() {
-            var list = [ "gets", "to", "uparrow", "downarrow", "leftrightarrow", "updownarrow", {
-                key: "\\Leftarrow",
-                img: "u-leftarrow"
-            }, {
-                key: "\\Rightarrow",
-                img: "u-rightarrow"
-            }, {
-                key: "\\Uparrow",
-                img: "u-uparrow"
-            }, {
-                key: "\\Downarrow",
-                img: "u-downarrow"
-            }, {
-                key: "\\Leftrightarrow",
-                img: "u-leftrightarrow"
-            }, {
-                key: "\\Updownarrow",
-                img: "u-updownarrow"
-            }, "longleftarrow", "longrightarrow", "longleftrightarrow", {
-                key: "\\Longleftarrow",
-                img: "u-longleftarrow"
-            }, {
-                key: "\\Longrightarrow",
-                img: "u-longrightarrow"
-            }, {
-                key: "\\Longleftrightarrow",
-                img: "u-longleftrightarrow"
-            }, "nearrow", "nwarrow", "searrow", "swarrow", "nleftarrow", "nrightarrow", {
-                key: "\\nLeftarrow",
-                img: "u-nleftarrow"
-            }, {
-                key: "\\nRightarrow",
-                img: "u-nrightarrow"
-            }, {
-                key: "\\nLeftrightarrow",
-                img: "u-nleftrightarrow"
-            }, "leftharpoonup", "leftharpoondown", "rightharpoonup", "rightharpoondown", "upharpoonleft", "upharpoonright", "downharpoonleft", "downharpoonright", "leftrightharpoons", "rightleftharpoons", "leftleftarrows", "rightrightarrows", "upuparrows", "downdownarrows", "leftrightarrows", "rightleftarrows", "looparrowleft", "looparrowright", "leftarrowtail", "rightarrowtail", {
-                key: "\\Lsh",
-                img: "u-lsh"
-            }, {
-                key: "\\Rsh",
-                img: "u-rsh"
-            }, {
-                key: "\\Lleftarrow",
-                img: "u-lleftarrow"
-            }, {
-                key: "\\Rrightarrow",
-                img: "u-rrightarrow"
-            }, "curvearrowleft", "curvearrowright", "circlearrowleft", "circlearrowright", "multimap", "leftrightsquigarrow", "twoheadleftarrow", "twoheadrightarrow", "rightsquigarrow" ], configList = config[2].options.box.group[4].items;
-            configList.push({
-                title: "箭头",
-                content: getContents({
-                    path: "assets/images/toolbar/arrow/",
-                    values: list
-                })
-            });
-        })();
-        (function() {
-            var list = [ {
-                title: "手写体",
-                values: [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" ]
-            }, {
-                title: "花体",
-                values: [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" ]
-            }, {
-                title: "双线",
-                values: [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" ]
-            }, {
-                title: "罗马",
-                values: [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" ]
-            } ], configList = config[2].options.box.group[5].items;
-            kity.Utils.each(list[0].values, function(item, index) {
-                list[0].values[index] = {
-                    key: "\\mathcal{" + item + "}",
-                    img: item.toLowerCase()
-                };
-            });
-            kity.Utils.each(list[1].values, function(item, index) {
-                list[1].values[index] = {
-                    key: "\\mathfrak{" + item + "}",
-                    img: item.replace(/[A-Z]/, function(match) {
-                        return "u" + match.toLowerCase();
-                    })
-                };
-            });
-            kity.Utils.each(list[2].values, function(item, index) {
-                list[2].values[index] = {
-                    key: "\\mathbb{" + item + "}",
-                    img: item.toLowerCase()
-                };
-            });
-            kity.Utils.each(list[3].values, function(item, index) {
-                list[3].values[index] = {
-                    key: "\\mathrm{" + item + "}",
-                    img: item.replace(/[A-Z]/, function(match) {
-                        return "u" + match.toLowerCase();
-                    })
-                };
-            });
-            // 手写体
-            configList.push({
-                title: list[0].title,
-                content: getContents({
-                    path: "assets/images/toolbar/char/cal/",
-                    values: list[0].values
-                })
-            });
-            configList.push({
-                title: list[1].title,
-                content: getContents({
-                    path: "assets/images/toolbar/char/frak/",
-                    values: list[1].values
-                })
-            });
-            configList.push({
-                title: list[2].title,
-                content: getContents({
-                    path: "assets/images/toolbar/char/bb/",
-                    values: list[2].values
-                })
-            });
-            configList.push({
-                title: list[3].title,
-                content: getContents({
-                    path: "assets/images/toolbar/char/rm/",
-                    values: list[3].values
-                })
-            });
-        })();
-        function getContents(data) {
-            var result = [], path = data.path, values = data.values;
-            kity.Utils.each(values, function(value) {
-                var img = value, val = value;
-                if (typeof value !== "string") {
-                    img = value.img;
-                    val = value.key;
-                } else {
-                    val = "\\" + value;
-                }
-                result.push({
-                    item: {
-                        show: "" + path + img.toLowerCase() + ".png",
-                        val: val
-                    }
-                });
-            });
-            return result;
-        }
-        window.iconConfig = config;
-        return config;
-    }
-};
-
-/*!
- * toolbar元素列表定义
- */
-_p[35] = {
-    value: function(require) {
         var UI_ELE_TYPE = _p.r(41), BOX_TYPE = _p.r(40), CHAR_POSITION = _p.r(30), OTHER_POSITION = _p.r(33), kity = _p.r(20);
         var config = [ {
             type: UI_ELE_TYPE.DRAPDOWN_BOX,
@@ -5996,7 +5379,17 @@ _p[35] = {
             });
             return result;
         }
+        console.log(JSON.stringify(config, null, 4));
         return config;
+    }
+};
+
+/*!
+ * toolbar元素列表定义
+ */
+_p[35] = {
+    value: function(require) {
+        return window.KF_UI_CONFIG;
     }
 };
 
@@ -7557,7 +6950,7 @@ _p[48] = {
 _p[49] = {
     value: function(require) {
         var kity = _p.r(20), // UiUitls
-        $ = _p.r(47), Utils = _p.r(4), VIEW_STATE = _p.r(32).VIEW_STATE, Scrollbar = _p.r(46), Toolbar = _p.r(36), // 控制组件
+        $ = _p.r(47), enableTatex = _p.r(29).enableLatex, Utils = _p.r(4), VIEW_STATE = _p.r(32).VIEW_STATE, Scrollbar = _p.r(46), Toolbar = _p.r(36), // 控制组件
         ScrollZoom = _p.r(31), ELEMENT_LIST = _p.r(35), UIComponent = kity.createClass("UIComponent", {
             constructor: function(kfEditor, options) {
                 var currentDocument = null;
@@ -7568,6 +6961,7 @@ _p[49] = {
                 this.components = {};
                 this.canvasRect = null;
                 this.viewState = VIEW_STATE.NO_OVERFLOW;
+                this.latexInput = null;
                 this.kfEditor = kfEditor;
                 this.toolbarWrap = createToolbarWrap(currentDocument);
                 this.toolbarContainer = createToolbarContainer(currentDocument);
@@ -7576,6 +6970,11 @@ _p[49] = {
                 this.scrollbarContainer = createScrollbarContainer(currentDocument);
                 this.toolbarWrap.appendChild(this.toolbarContainer);
                 this.container.appendChild(this.toolbarWrap);
+                if (enableTatex) {
+                    this.latexArea = creatLatexArea(currentDocument);
+                    this.latexInput = this.latexArea.firstChild;
+                    this.editArea.appendChild(this.latexArea);
+                }
                 this.editArea.appendChild(this.canvasContainer);
                 this.container.appendChild(this.editArea);
                 this.container.appendChild(this.scrollbarContainer);
@@ -7609,6 +7008,9 @@ _p[49] = {
                 this.kfEditor.registerService("ui.get.canvas.container", this, {
                     getCanvasContainer: this.getCanvasContainer
                 });
+                this.kfEditor.registerService("ui.get.latex.input", this, {
+                    getLatexInput: this.getLatexInput
+                });
                 this.kfEditor.registerService("ui.update.canvas.view", this, {
                     updateCanvasView: this.updateCanvasView
                 });
@@ -7619,7 +7021,11 @@ _p[49] = {
                     fire: this.trigger
                 });
             },
-            initEvent: function() {},
+            initEvent: function() {
+                Utils.addEvent(this.container, "mousewheel", function(e) {
+                    e.preventDefault();
+                });
+            },
             initScrollEvent: function() {
                 var _self = this;
                 this.kfEditor.requestService("ui.set.scrollbar.update.handler", function(proportion, offset, values) {
@@ -7636,6 +7042,9 @@ _p[49] = {
             removeEvent: function() {},
             trigger: function(type) {
                 Utils.trigger(this.canvasContainer, type);
+            },
+            getLatexInput: function() {
+                return this.latexInput;
             },
             // 更新画布视窗， 决定是否出现滚动条
             updateCanvasView: function() {
@@ -7693,6 +7102,12 @@ _p[49] = {
         function createScrollbarContainer(doc) {
             var container = doc.createElement("div");
             container.className = "kf-editor-edit-scrollbar";
+            return container;
+        }
+        function creatLatexArea(doc) {
+            var container = doc.createElement("div");
+            container.className = "kf-editor-latex-area";
+            container.innerHTML = '<input type="text" class="kf-editor-latex-input">';
             return container;
         }
         return UIComponent;

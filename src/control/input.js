@@ -49,6 +49,10 @@ define( function ( require, exports, module ) {
                 updateLatexMode: this.updateLatexMode
             } );
 
+            this.kfEditor.registerService( "control.set.source", this, {
+                setSource: this.setSource
+            } );
+
         },
 
         initCommands: function () {
@@ -114,6 +118,10 @@ define( function ( require, exports, module ) {
 
             return this.latexInput.value.replace( /\\placeholder/g, '' );
 
+        },
+
+        setSource: function ( value ) {
+            this.latexInput.value = value;
         },
 
         updateLatexMode: function ( mode ) {
