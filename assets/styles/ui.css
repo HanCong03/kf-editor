@@ -93,15 +93,15 @@
 }
 
 .kf-editor-toolbar .kf-editor-ui-button-in {
-    border-color: #8fcc91!important;
-    background: #e0f0dd!important;
+    border-color: #84a5d2!important;
+    background: #bfcee3!important;
 }
 
 .kf-editor-toolbar .kf-editor-ui-overlap-button {
     padding-top: 0;
     padding-bottom: 0;
-    border-color: #61b864!important;
-    background: #61b864!important;
+    border-color: #7297cb!important;
+    background: #7297cb!important;
 }
 
 /* 分割符 */
@@ -112,8 +112,8 @@
 }
 
 .kf-editor-ui-enabled.kf-editor-ui-button:HOVER {
-    border: 1px solid #a9d9ab;
-    background: #ebf7e6;
+    border: 1px solid #c5d5ea;
+    background: #e7ecf3;
 }
 
 .kf-editor-ui-enabled.kf-editor-ui-overlap-button:HOVER {
@@ -137,10 +137,12 @@
     position: absolute;
     top: 0;
     left: -1px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .kf-editor-ui-area .kf-editor-ui-box {
-    border-color: #61b864;
+    border-color: #7297cb;
 }
 
 .kf-editor-ui-box-container {
@@ -187,11 +189,11 @@
 }
 
 .kf-editor-ui-box-item-content:HOVER {
-    border-color: #dff3df;
+    border-color: #d8e8fd;
 }
 
 .kf-editor-ui-box-item-content:HOVER .kf-editor-ui-box-item-val {
-    border-color: #6eb864;
+    border-color: #80a0cc;
 }
 
 .kf-editor-ui-area .kf-editor-ui-box-item {
@@ -228,7 +230,7 @@
 }
 
 .kf-editor-ui-area .kf-editor-ui-box-item-content:HOVER {
-    border: 1px solid #dff3df;
+    border: 1px solid #d8e8fd;
 }
 
 .kf-editor-ui-box-item-val {
@@ -376,7 +378,7 @@
 }
 
 .kf-editor-ui-list-item-select {
-    color: #61b864;
+    color: #7297cb;
     font-weight: bold;
 }
 
@@ -388,8 +390,8 @@
 }
 
 .kf-editor-ui-list-item:HOVER {
-    border-color: #beddbf;
-    background-color: #ecf3e9;
+    border-color: #afc9ed;
+    background-color: #dfe6ef;
 }
 
 .kf-editor-ui-list-item-icon {
@@ -428,7 +430,7 @@
 }
 
 .kf-editor-ui-enabled .kf-editor-ui-area-item-inner:HOVER {
-    border-color: #dff3df;
+    border-color: #d8e8fd;
 
     -webkit-transform: scale( 1 );
     -moz-transform: scale( 1 );
@@ -445,7 +447,7 @@
 }
 
 .kf-editor-ui-enabled .kf-editor-ui-area-item-inner:HOVER .kf-editor-ui-area-item-img {
-    border-color: #6eb864;
+    border-color: #80a0cc;
 }
 
 .kf-editor-ui-enabled {
