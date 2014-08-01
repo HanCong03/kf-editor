@@ -56,6 +56,8 @@ define( function ( require, exports, module ) {
             this.kfEditor.registerCommand( "reset", this, this.reset );
             this.kfEditor.registerCommand( "focus", this, this.focus );
 
+            this.kfEditor.registerCommand( "get.source", this, this.getSource );
+
         },
 
         reset: function () {
@@ -105,6 +107,12 @@ define( function ( require, exports, module ) {
             }
 
             this.kfEditor.requestService( "control.reselect" );
+
+        },
+
+        getSource: function () {
+
+            return this.latexInput.value.replace( /\\placeholder/g, '' );
 
         },
 
