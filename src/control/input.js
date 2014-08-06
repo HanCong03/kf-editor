@@ -236,7 +236,7 @@ define( function ( require, exports, module ) {
 
                 try {
                     _self.processingInput();
-                } catch ( e ) {
+                } catch ( error ) {
                     // do nothing
                 }
 
@@ -295,7 +295,7 @@ define( function ( require, exports, module ) {
                     try {
                         _self.kfEditor.requestService( "render.draw", this.value );
                         _self.kfEditor.requestService( "ui.update.canvas.view" );
-                    } catch ( e ) {
+                    } catch ( error ) {
                         // do nothing
                     }
 

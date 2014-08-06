@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * Kity Formula Editor - v1.0.0 - 2014-08-01
+ * Kity Formula Editor - v1.0.0 - 2014-08-07
  * https://github.com/kitygraph/formula
  * GitHub: https://github.com/kitygraph/formula.git 
  * Copyright (c) 2014 Baidu Kity Group; Licensed MIT
@@ -432,7 +432,9 @@ _p[7] = {
                 });
                 // 用户输入
                 kfUtils.addEvent(this.inputBox, "input", function(e) {
-                    _self.processingInput();
+                    try {
+                        _self.processingInput();
+                    } catch (error) {}
                 });
                 // 光标显隐控制
                 kfUtils.addEvent(this.inputBox, "blur", function(e) {
@@ -466,8 +468,10 @@ _p[7] = {
                         _self.kfEditor.requestService("ui.toolbar.close");
                     });
                     kfUtils.addEvent(this.latexInput, "input", function(e) {
-                        _self.kfEditor.requestService("render.draw", this.value);
-                        _self.kfEditor.requestService("ui.update.canvas.view");
+                        try {
+                            _self.kfEditor.requestService("render.draw", this.value);
+                            _self.kfEditor.requestService("ui.update.canvas.view");
+                        } catch (error) {}
                     });
                 }
                 // 粘贴过滤
