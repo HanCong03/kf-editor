@@ -234,7 +234,11 @@ define( function ( require, exports, module ) {
             // 用户输入
             kfUtils.addEvent( this.inputBox, "input", function ( e ) {
 
-                _self.processingInput();
+                try {
+                    _self.processingInput();
+                } catch ( e ) {
+                    // do nothing
+                }
 
             } );
 
@@ -288,8 +292,12 @@ define( function ( require, exports, module ) {
 
                 kfUtils.addEvent( this.latexInput, "input", function ( e ) {
 
-                    _self.kfEditor.requestService( "render.draw", this.value );
-                    _self.kfEditor.requestService( "ui.update.canvas.view" );
+                    try {
+                        _self.kfEditor.requestService( "render.draw", this.value );
+                        _self.kfEditor.requestService( "ui.update.canvas.view" );
+                    } catch ( e ) {
+                        // do nothing
+                    }
 
                 } );
 
