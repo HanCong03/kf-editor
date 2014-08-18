@@ -29,6 +29,8 @@ define( function ( require ) {
                 this.assembly = null;
                 this.formula = null;
 
+                this.__cbList = [];
+
                 // 是否禁用重定位
                 this.relDisabled = false;
                 this.canvasZoom = 1;
@@ -177,6 +179,8 @@ define( function ( require ) {
                     this.kfEditor.requestService( "ui.update.canvas.view" );
                 } );
 
+                this.kfEditor.registerCommand( "register.render.listener", this, this.registerListener );
+
                 this.kfEditor.registerCommand( "getPaper", this, this.getPaper );
 
             },
@@ -206,6 +210,12 @@ define( function ( require ) {
 
                 this.formula.container.setTranslate( 0, -formulaSpace.height / 2 );
                 this.setCanvasOffset( 0 );
+
+            },
+
+            registerListener: function ( cb ) {
+
+                this.__cbList.push( cb );
 
             },
 

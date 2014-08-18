@@ -13,6 +13,7 @@ define( function ( require, exports, module ) {
             LEFT: 37,
             RIGHT: 39,
             DELETE: 8,
+            ENTER: 13,
             // 输入法特殊处理
             INPUT: 229
         };
@@ -219,6 +220,12 @@ define( function ( require, exports, module ) {
                         isControl = true;
                         break;
 
+                    case KEY_CODE.ENTER:
+                        e.preventDefault();
+                        _self.newLine();
+                        isControl = true;
+                        break;
+
                 }
 
                 if ( isControl ) {
@@ -358,6 +365,55 @@ define( function ( require, exports, module ) {
                 this.updateInput();
                 this.kfEditor.requestService( "control.reselect" );
             }
+
+        },
+
+        newLine: function () {
+
+            var latexInfo = this.kfEditor.requestService( "syntax.serialization" ),
+                match = null,
+                source = null,
+                pattern = /\\begin\{cases\}[\s\S]*?\\end\{cases\}/ig,
+                originString = latexInfo.str;
+
+            while ( match = pattern.exec( originString ) ) {
+
+                source = match[0];
+
+                if ( source.indexOf( CURSOR_CHAR ) === -1 ) {
+                    source = null;
+                    continue;
+                } else {
+                    break;
+                }
+
+            }
+
+            if ( !source ) {
+                return;
+            }
+
+            source = source.replace( "\\begin{cases}", "" ).replace( "\\end{cases}", "" );
+
+            source = source.split( "\\\\" );
+
+            for ( var i = 0, len = source.length; i < len; i++ ) {
+
+                if ( source[ i ].indexOf( CURSOR_CHAR ) !== -1 ) {
+                    source[ i ] = source[ i ].replace( CURSOR_CHAR, "" ).replace( CURSOR_CHAR, "" );
+                    source.splice( i+1, 0, CURSOR_CHAR + " \\placeholder "+ CURSOR_CHAR );
+                    break;
+                }
+
+            }
+
+            source = "\\begin{cases}" + source.join( "\\\\" ) + "\\end{cases}";
+
+            this.inputBox.value = source;
+            this.inputBox.selectionStart = source.indexOf( CURSOR_CHAR );
+            this.inputBox.selectionEnd = source.lastIndexOf( CURSOR_CHAR );
+
+            this.processingInput();
 
         },
 

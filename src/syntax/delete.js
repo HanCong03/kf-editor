@@ -93,6 +93,7 @@ define( function ( require, exports, module ) {
                     } else {
 
                         cursorInfo = this.selectParentContainer( cursorInfo.groupId );
+
                         this.parentComponent.updateCursor( cursorInfo );
 
                         return false;
@@ -101,6 +102,55 @@ define( function ( require, exports, module ) {
 
                 // 其他选区正常删除
                 } else {
+
+                    var tmpCursorInfo = this.selectParentContainer( cursorInfo.groupId ),
+                        isPlaceholder = false,
+                        tmpCurrentTree = null,
+                        tmpTree = objTree.mapping[ tmpCursorInfo.groupId ].strGroup;
+
+                    // cases语句删除
+                    if ( tmpTree.name === "cases" ) {
+
+                        tmpCurrentTree = tmpTree.operand[ tmpCursorInfo.startOffset ];
+
+                        while ( tmpCurrentTree.operand && tmpCurrentTree.operand.length > 0 ) {
+
+                            isPlaceholder = tmpCurrentTree.operand[ 0 ].name === "placeholder";
+
+                            if ( isPlaceholder ) {
+                                break;
+                            }
+
+                            tmpCurrentTree = tmpCurrentTree.operand[ 0 ];
+
+                        }
+
+                        if ( isPlaceholder ) {
+
+                            // 选中整个表达式
+                            if ( tmpTree.operand.length === 1 ) {
+                                tmpCursorInfo = this.selectParentContainer( cursorInfo.groupId );
+                                tmpCursorInfo = this.selectParentContainer( tmpCursorInfo.groupId );
+                                this.parentComponent.updateCursor( tmpCursorInfo );
+                                return false;
+                            }
+
+                            tmpTree.operand.splice( tmpCursorInfo.startOffset, 1 );
+
+                            if ( tmpCursorInfo.startOffset > 0 ) {
+                                tmpCursorInfo.startOffset -= 1;
+                                tmpCursorInfo.endOffset -= 1;
+                            }
+
+                            this.parentComponent.updateCursor( tmpCursorInfo );
+
+                            return true;
+
+                        } else {
+                            return this.deleteSelection( currentTree, cursorInfo );
+                        }
+
+                    }
 
                     return this.deleteSelection( currentTree, cursorInfo );
 

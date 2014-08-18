@@ -24,10 +24,10 @@
 
             var factory = kf.EditorFactory.create( $( "#kfEditorContainer" )[ 0 ], {
                 render: {
-                    fontsize: 40
+                    fontsize: 20
                 },
                 resource: {
-                    path: "http://localhost/kf-editor/resource/"
+                    path: "/resource/"
                 }
             } );
 
@@ -35,7 +35,7 @@
 
                 // this指向KFEditor
 
-                this.execCommand( "render", "abcdeafdapoiuoiuomassdfasdfasdfasjkljpoijdf" );
+                this.execCommand( "render", "\\begin{cases}a+b\\\\a-d\\end{cases}" );
                 this.execCommand( "focus" );
 
                 window.kfe = this;
