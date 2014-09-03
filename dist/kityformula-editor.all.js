@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * Kity Formula Editor - v1.0.0 - 2014-08-07
+ * Kity Formula Editor - v1.0.0 - 2014-08-22
  * https://github.com/kitygraph/formula
  * GitHub: https://github.com/kitygraph/formula.git 
  * Copyright (c) 2014 Baidu Kity Group; Licensed MIT
@@ -140,7 +140,7 @@ _p[0] = {
  */
 _p[1] = {
     value: function(require) {
-        var kity = _p.r(20);
+        var kity = _p.r(21);
         return kity.createClass("Component", {
             constructor: function() {}
         });
@@ -237,7 +237,7 @@ _p[4] = {
  */
 _p[5] = {
     value: function(require) {
-        var kity = _p.r(20), ListenerComponent = _p.r(8), ControllerComponent = kity.createClass("ControllerComponent", {
+        var kity = _p.r(21), ListenerComponent = _p.r(8), ControllerComponent = kity.createClass("ControllerComponent", {
             constructor: function(kfEditor) {
                 this.kfEditor = kfEditor;
                 this.components = {};
@@ -283,10 +283,11 @@ _p[6] = {
  */
 _p[7] = {
     value: function(require, exports, module) {
-        var kity = _p.r(20), kfUtils = _p.r(4), CONF = _p.r(29), CURSOR_CHAR = CONF.cursorCharacter, InputFilter = _p.r(6), KEY_CODE = {
+        var kity = _p.r(21), kfUtils = _p.r(4), CONF = _p.r(37), CURSOR_CHAR = CONF.cursorCharacter, InputFilter = _p.r(6), KEY_CODE = {
             LEFT: 37,
             RIGHT: 39,
             DELETE: 8,
+            ENTER: 13,
             // 输入法特殊处理
             INPUT: 229
         };
@@ -422,6 +423,12 @@ _p[7] = {
                         _self.delete();
                         isControl = true;
                         break;
+
+                      case KEY_CODE.ENTER:
+                        e.preventDefault();
+                        _self.newLine();
+                        isControl = true;
+                        break;
                     }
                     if (isControl) {
                         _self.kfEditor.requestService("ui.update.canvas.view");
@@ -513,6 +520,35 @@ _p[7] = {
                     this.kfEditor.requestService("control.reselect");
                 }
             },
+            newLine: function() {
+                var latexInfo = this.kfEditor.requestService("syntax.serialization"), match = null, source = null, pattern = /\\begin\{cases\}[\s\S]*?\\end\{cases\}/gi, originString = latexInfo.str;
+                while (match = pattern.exec(originString)) {
+                    source = match[0];
+                    if (source.indexOf(CURSOR_CHAR) === -1) {
+                        source = null;
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+                if (!source) {
+                    return;
+                }
+                source = source.replace("\\begin{cases}", "").replace("\\end{cases}", "");
+                source = source.split("\\\\");
+                for (var i = 0, len = source.length; i < len; i++) {
+                    if (source[i].indexOf(CURSOR_CHAR) !== -1) {
+                        source[i] = source[i].replace(CURSOR_CHAR, "").replace(CURSOR_CHAR, "");
+                        source.splice(i + 1, 0, CURSOR_CHAR + " \\placeholder " + CURSOR_CHAR);
+                        break;
+                    }
+                }
+                source = "\\begin{cases}" + source.join("\\\\") + "\\end{cases}";
+                this.inputBox.value = source;
+                this.inputBox.selectionStart = source.indexOf(CURSOR_CHAR);
+                this.inputBox.selectionEnd = source.lastIndexOf(CURSOR_CHAR);
+                this.processingInput();
+            },
             processUserCtrl: function(e) {
                 e.preventDefault();
                 switch (e.keyCode) {
@@ -563,7 +599,7 @@ _p[7] = {
  */
 _p[8] = {
     value: function(require, exports, module) {
-        var kity = _p.r(20), // 光标定位
+        var kity = _p.r(21), // 光标定位
         LocationComponent = _p.r(9), // 输入控制组件
         InputComponent = _p.r(7), // 选区
         SelectionComponent = _p.r(10);
@@ -588,7 +624,7 @@ _p[8] = {
  */
 _p[9] = {
     value: function(require, exports, module) {
-        var kity = _p.r(20);
+        var kity = _p.r(21);
         return kity.createClass("LocationComponent", {
             constructor: function(parentComponent, kfEditor) {
                 this.parentComponent = parentComponent;
@@ -733,7 +769,7 @@ _p[9] = {
  */
 _p[10] = {
     value: function(require, exports, module) {
-        var kity = _p.r(20), kfUtils = _p.r(4), // 鼠标移动临界距离
+        var kity = _p.r(21), kfUtils = _p.r(4), // 鼠标移动临界距离
         MAX_DISTANCE = 10;
         return kity.createClass("SelectionComponent", {
             constructor: function(parentComponent, kfEditor) {
@@ -994,7 +1030,7 @@ _p[11] = {
  */
 _p[12] = {
     value: function(require) {
-        var kity = _p.r(20), Utils = _p.r(4), defaultOpt = {
+        var kity = _p.r(21), Utils = _p.r(4), defaultOpt = {
             formula: {
                 fontsize: 50,
                 autoresize: false
@@ -1007,7 +1043,7 @@ _p[12] = {
         };
         // 同步组件列表
         var COMPONENTS = {}, // 异步组件列表
-        ResourceManager = _p.r(19).ResourceManager;
+        ResourceManager = _p.r(20).ResourceManager;
         var KFEditor = kity.createClass("KFEditor", {
             constructor: function(container, opt) {
                 this.options = Utils.extend(true, {}, defaultOpt, opt);
@@ -1124,7 +1160,7 @@ _p[12] = {
  */
 _p[13] = {
     value: function(require) {
-        var kity = _p.r(20), KFEditor = _p.r(12);
+        var kity = _p.r(21), KFEditor = _p.r(12);
         /* ------------------------------- 编辑器装饰对象 */
         function EditorWrapper(container, options) {
             var _self = this;
@@ -1156,9 +1192,18 @@ _p[13] = {
 };
 
 /**
- * Created by hn on 14-3-31.
+ * Created by hn on 14-3-12.
  */
 _p[14] = {
+    value: function() {
+        return window.FUI;
+    }
+};
+
+/**
+ * Created by hn on 14-3-31.
+ */
+_p[15] = {
     value: function() {
         return window.jQuery;
     }
@@ -1167,7 +1212,7 @@ _p[14] = {
 /**
  * Created by hn on 14-3-18.
  */
-_p[15] = {
+_p[16] = {
     value: function() {
         return {
             selectColor: "rgba(42, 106, 189, 0.2)",
@@ -1179,9 +1224,9 @@ _p[15] = {
 /**
  * 占位符表达式， 扩展KF自有的Empty表达式
  */
-_p[16] = {
+_p[17] = {
     value: function(require, exports, module) {
-        var kity = _p.r(20), kf = _p.r(19), PlaceholderOperator = _p.r(18);
+        var kity = _p.r(21), kf = _p.r(20), PlaceholderOperator = _p.r(19);
         return kity.createClass("PlaceholderExpression", {
             base: kf.CompoundExpression,
             constructor: function() {
@@ -1227,11 +1272,11 @@ _p[16] = {
 /**
  * 公式扩展接口
  */
-_p[17] = {
+_p[18] = {
     value: function(require) {
-        var kf = _p.r(19), SELECT_COLOR = _p.r(15).selectColor, ALL_SELECT_COLOR = _p.r(15).allSelectColor;
+        var kf = _p.r(20), SELECT_COLOR = _p.r(16).selectColor, ALL_SELECT_COLOR = _p.r(16).allSelectColor;
         function ext(parser) {
-            kf.PlaceholderExpression = _p.r(16);
+            kf.PlaceholderExpression = _p.r(17);
             kf.Expression.prototype.select = function() {
                 this.box.fill(SELECT_COLOR);
             };
@@ -1270,11 +1315,11 @@ _p[17] = {
 /**
  * 占位符操作符
  */
-_p[18] = {
+_p[19] = {
     value: function(require, exports, modules) {
-        var kity = _p.r(20), FILL_COLOR = _p.r(29).rootPlaceholder.color, SELECT_COLOR = _p.r(15).selectColor, ALL_SELECT_COLOR = _p.r(15).allSelectColor;
+        var kity = _p.r(21), FILL_COLOR = _p.r(37).rootPlaceholder.color, SELECT_COLOR = _p.r(16).selectColor, ALL_SELECT_COLOR = _p.r(16).allSelectColor;
         return kity.createClass("PlaceholderOperator", {
-            base: _p.r(19).Operator,
+            base: _p.r(20).Operator,
             constructor: function() {
                 this.opShape = null;
                 this.callBase("Placeholder");
@@ -1336,7 +1381,7 @@ _p[18] = {
 /**
  * Created by hn on 14-3-12.
  */
-_p[19] = {
+_p[20] = {
     value: function() {
         return window.kf;
     }
@@ -1345,18 +1390,550 @@ _p[19] = {
 /**
  * 数学公式Latex语法解析器
  */
-_p[20] = {
+_p[21] = {
     value: function() {
         return window.kity;
     }
 };
 
 /**
+ * Created by hn on 14-8-20.
+ */
+_p[22] = {
+    value: function(require) {
+        return window.KF_UI_CONFIG;
+    }
+};
+
+/*!
+ * UI定义
+ */
+_p[23] = {
+    value: function(require) {
+        return {
+            // 视窗状态
+            VIEW_STATE: {
+                // 内容未超出画布
+                NO_OVERFLOW: 0,
+                // 内容溢出
+                OVERFLOW: 1
+            },
+            scrollbar: {
+                step: 50,
+                thumbMinSize: 50
+            }
+        };
+    }
+};
+
+/*!
+ * box类型定义
+ */
+_p[24] = {
+    value: function(require) {
+        return {
+            // 分离式
+            DETACHED: 1,
+            // 重叠式
+            OVERLAP: 2
+        };
+    }
+};
+
+/*!
+ * toolbar元素类型定义
+ */
+_p[25] = {
+    value: function(require) {
+        return {
+            DRAPDOWN_BOX: 1,
+            AREA: 2,
+            DELIMITER: 3
+        };
+    }
+};
+
+/*!
+ * 组元素类型定义
+ */
+_p[26] = {
+    value: function(require) {
+        return {
+            BIG: 1,
+            SMALL: 2
+        };
+    }
+};
+
+/*!
+ * 滚动条组件
+ */
+_p[27] = {
+    value: function(require) {
+        var kity = _p.r(21), SCROLLBAR_DEF = _p.r(23).scrollbar, SCROLLBAR_CONF = _p.r(37).scrollbar, Utils = _p.r(4), CLASS_PREFIX = "kf-editor-ui-";
+        return kity.createClass("Scrollbar", {
+            constructor: function(uiComponent, kfEditor) {
+                this.uiComponent = uiComponent;
+                this.kfEditor = kfEditor;
+                this.widgets = null;
+                this.container = this.uiComponent.scrollbarContainer;
+                // 显示状态
+                this.state = false;
+                // 滚动条当前各个状态下的值
+                this.values = {
+                    // 滚动条此时实际的偏移值, 计算的时候假定滑块的宽度为0
+                    offset: 0,
+                    // 滑块此时偏移位置所占轨道的比例, 计算的时候假定滑块的宽度为0
+                    left: 0,
+                    // 滚动条控制的容器的可见宽度
+                    viewWidth: 0,
+                    // 滚动条对应的内容实际宽度
+                    contentWidth: 0,
+                    // 轨道长度
+                    trackWidth: 0,
+                    // 滑块宽度
+                    thumbWidth: 0,
+                    // 可滚动的宽度
+                    scrollWidth: 0
+                };
+                // 滑块的物理偏移， 不同于values.offset
+                this.thumbLocationX = 0;
+                // 左溢出长度
+                this.leftOverflow = 0;
+                // 右溢出长度
+                this.rightOverflow = 0;
+                // 记录本次和上一次改变内容之间宽度是否变大
+                this.isExpand = true;
+                this.initWidget();
+                this.mountWidget();
+                this.initSize();
+                this.hide();
+                this.initServices();
+                this.initEvent();
+                this.updateHandler = function() {};
+            },
+            initWidget: function() {
+                var doc = this.container.ownerDocument;
+                this.widgets = {
+                    leftButton: createElement(doc, "div", "left-button"),
+                    rightButton: createElement(doc, "div", "right-button"),
+                    track: createElement(doc, "div", "track"),
+                    thumb: createElement(doc, "div", "thumb"),
+                    thumbBody: createElement(doc, "div", "thumb-body")
+                };
+            },
+            initSize: function() {
+                var leftBtnWidth = getRect(this.widgets.leftButton).width, rightBtnWidth = getRect(this.widgets.rightButton).width;
+                this.values.viewWidth = getRect(this.container).width;
+                this.values.trackWidth = this.values.viewWidth - leftBtnWidth - rightBtnWidth;
+                this.widgets.track.style.width = this.values.trackWidth + "px";
+            },
+            initServices: function() {
+                this.kfEditor.registerService("ui.show.scrollbar", this, {
+                    showScrollbar: this.show
+                });
+                this.kfEditor.registerService("ui.hide.scrollbar", this, {
+                    hideScrollbar: this.hide
+                });
+                this.kfEditor.registerService("ui.update.scrollbar", this, {
+                    updateScrollbar: this.update
+                });
+                this.kfEditor.registerService("ui.set.scrollbar.update.handler", this, {
+                    setUpdateHandler: this.setUpdateHandler
+                });
+                this.kfEditor.registerService("ui.relocation.scrollbar", this, {
+                    relocation: this.relocation
+                });
+            },
+            initEvent: function() {
+                preventDefault(this);
+                trackClick(this);
+                thumbHandler(this);
+                btnClick(this);
+            },
+            mountWidget: function() {
+                var widgets = this.widgets, container = this.container;
+                for (var wgtName in widgets) {
+                    if (widgets.hasOwnProperty(wgtName)) {
+                        container.appendChild(widgets[wgtName]);
+                    }
+                }
+                widgets.thumb.appendChild(widgets.thumbBody);
+                widgets.track.appendChild(widgets.thumb);
+            },
+            show: function() {
+                this.state = true;
+                this.container.style.display = "block";
+            },
+            hide: function() {
+                this.state = false;
+                this.container.style.display = "none";
+            },
+            update: function(contentWidth) {
+                var trackWidth = this.values.trackWidth, thumbWidth = 0;
+                this.isExpand = contentWidth > this.values.contentWidth;
+                this.values.contentWidth = contentWidth;
+                this.values.scrollWidth = contentWidth - this.values.viewWidth;
+                if (trackWidth >= contentWidth) {
+                    this.hide();
+                    return;
+                }
+                thumbWidth = Math.max(Math.ceil(trackWidth * trackWidth / contentWidth), SCROLLBAR_DEF.thumbMinSize);
+                this.values.thumbWidth = thumbWidth;
+                this.widgets.thumb.style.width = thumbWidth + "px";
+                this.widgets.thumbBody.style.width = thumbWidth - 10 + "px";
+            },
+            setUpdateHandler: function(updateHandler) {
+                this.updateHandler = updateHandler;
+            },
+            updateOffset: function(offset) {
+                var values = this.values;
+                values.offset = offset;
+                values.left = offset / values.trackWidth;
+                this.leftOverflow = values.left * (values.contentWidth - values.viewWidth);
+                this.rightOverflow = values.contentWidth - values.viewWidth - this.leftOverflow;
+                this.updateHandler(values.left, values.offset, values);
+            },
+            relocation: function() {
+                var cursorLocation = this.kfEditor.requestService("control.get.cursor.location"), padding = SCROLLBAR_CONF.padding, contentWidth = this.values.contentWidth, viewWidth = this.values.viewWidth, // 视图左溢出长度
+                viewLeftOverflow = this.values.left * (contentWidth - viewWidth), diff = 0;
+                if (cursorLocation.x < viewLeftOverflow) {
+                    if (cursorLocation.x < 0) {
+                        cursorLocation.x = 0;
+                    }
+                    setThumbOffsetByViewOffset(this, cursorLocation.x);
+                } else if (cursorLocation.x + padding > viewLeftOverflow + viewWidth) {
+                    cursorLocation.x += padding;
+                    if (cursorLocation.x > contentWidth) {
+                        cursorLocation.x = contentWidth;
+                    }
+                    diff = cursorLocation.x - viewWidth;
+                    setThumbOffsetByViewOffset(this, diff);
+                } else {
+                    if (this.isExpand) {
+                        // 根据上一次左溢出值设置滑块位置
+                        setThumbByLeftOverflow(this, this.leftOverflow);
+                    } else {
+                        // 减少左溢出
+                        setThumbByLeftOverflow(this, contentWidth - viewWidth - this.rightOverflow);
+                    }
+                }
+            }
+        });
+        function createElement(doc, eleName, className) {
+            var node = doc.createElement(eleName), str = '<div class="$1"></div><div class="$2"></div>';
+            node.className = CLASS_PREFIX + className;
+            if (className === "thumb") {
+                className = CLASS_PREFIX + className;
+                node.innerHTML = str.replace("$1", className + "-left").replace("$2", className + "-right");
+            }
+            return node;
+        }
+        function getRect(node) {
+            return node.getBoundingClientRect();
+        }
+        // 阻止浏览器在scrollbar上的默认行为
+        function preventDefault(container) {
+            Utils.addEvent(container, "mousedown", function(e) {
+                e.preventDefault();
+            });
+        }
+        function preventDefault(comp) {
+            Utils.addEvent(comp.container, "mousedown", function(e) {
+                e.preventDefault();
+            });
+        }
+        // 轨道点击
+        function trackClick(comp) {
+            Utils.addEvent(comp.widgets.track, "mousedown", function(e) {
+                trackClickHandler(this, comp, e);
+            });
+        }
+        // 两端按钮点击
+        function btnClick(comp) {
+            // left
+            Utils.addEvent(comp.widgets.leftButton, "mousedown", function() {
+                setThumbOffsetByStep(comp, -SCROLLBAR_CONF.step);
+            });
+            Utils.addEvent(comp.widgets.rightButton, "mousedown", function() {
+                setThumbOffsetByStep(comp, SCROLLBAR_CONF.step);
+            });
+        }
+        // 滑块处理
+        function thumbHandler(comp) {
+            var isMoving = false, startPoint = 0, startOffset = 0, trackWidth = comp.values.trackWidth;
+            Utils.addEvent(comp.widgets.thumb, "mousedown", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                isMoving = true;
+                startPoint = e.clientX;
+                startOffset = comp.thumbLocationX;
+            });
+            Utils.addEvent(comp.container.ownerDocument, "mouseup", function() {
+                isMoving = false;
+                startPoint = 0;
+                startOffset = 0;
+            });
+            Utils.addEvent(comp.container.ownerDocument, "mousemove", function(e) {
+                if (!isMoving) {
+                    return;
+                }
+                var distance = e.clientX - startPoint, offset = startOffset + distance, thumbWidth = comp.values.thumbWidth;
+                if (offset < 0) {
+                    offset = 0;
+                } else if (offset + thumbWidth > trackWidth) {
+                    offset = trackWidth - thumbWidth;
+                }
+                setThumbLocation(comp, offset);
+            });
+        }
+        // 轨道点击处理器
+        function trackClickHandler(track, comp, evt) {
+            var trackRect = getRect(track), values = comp.values, // 单位偏移值， 一个viewWidth所对应到轨道上后的offset值
+            unitOffset = values.viewWidth / (values.contentWidth - values.viewWidth) * values.trackWidth, // 点击位置在轨道中的偏移
+            clickOffset = evt.clientX - trackRect.left;
+            // right click
+            if (clickOffset > values.offset) {
+                // 剩余距离已经不足以支撑滚动， 则直接偏移置最大
+                if (values.offset + unitOffset > values.trackWidth) {
+                    setThumbOffset(comp, values.trackWidth);
+                } else {
+                    setThumbOffset(comp, values.offset + unitOffset);
+                }
+            } else {
+                // 剩余距离已经不足以支撑滚动， 则直接把偏移置零
+                if (values.offset - unitOffset < 0) {
+                    setThumbOffset(comp, 0);
+                } else {
+                    setThumbOffset(comp, values.offset - unitOffset);
+                }
+            }
+        }
+        function setThumbLocation(comp, locationX) {
+            // 滑块偏移值
+            var values = comp.values, trackPieceWidth = values.trackWidth - values.thumbWidth, offset = Math.floor(locationX / trackPieceWidth * values.trackWidth);
+            comp.updateOffset(offset);
+            // 更新滑块物理偏移: 定位
+            comp.thumbLocationX = locationX;
+            comp.widgets.thumb.style.left = locationX + "px";
+        }
+        // 根据指定的内容视图上移动的步长来改变滚动条的offset值
+        function setThumbOffsetByStep(comp, step) {
+            var leftOverflow = comp.leftOverflow + step;
+            // 修正越界
+            if (leftOverflow < 0) {
+                leftOverflow = 0;
+            } else if (leftOverflow > comp.values.scrollWidth) {
+                leftOverflow = comp.values.scrollWidth;
+            }
+            setThumbByLeftOverflow(comp, leftOverflow);
+        }
+        // 设置偏移值, 会同时更新滑块在显示上的定位
+        function setThumbOffset(comp, offset) {
+            var values = comp.values, offsetProportion = offset / values.trackWidth, trackPieceWidth = values.trackWidth - values.thumbWidth, thumbLocationX = 0;
+            thumbLocationX = Math.floor(offsetProportion * trackPieceWidth);
+            if (offset < 0) {
+                offset = 0;
+                thumbLocationX = 0;
+            }
+            comp.updateOffset(offset);
+            // 更新滑块定位
+            comp.widgets.thumb.style.left = thumbLocationX + "px";
+            comp.thumbLocationX = thumbLocationX;
+        }
+        /**
+     * 根据内容视图上的偏移值设置滑块位置
+     */
+        function setThumbOffsetByViewOffset(comp, viewOffset) {
+            var values = comp.values, offsetProportion = 0, offset = 0;
+            // 轨道偏移比例
+            offsetProportion = viewOffset / (values.contentWidth - values.viewWidth);
+            // 轨道偏移值
+            offset = Math.floor(offsetProportion * values.trackWidth);
+            setThumbOffset(comp, offset);
+        }
+        /**
+     * 根据左溢出值设置滑块定位
+     */
+        function setThumbByLeftOverflow(comp, leftViewOverflow) {
+            var values = comp.values, overflowProportion = leftViewOverflow / (values.contentWidth - values.viewWidth);
+            setThumbOffset(comp, overflowProportion * values.trackWidth);
+        }
+    }
+};
+
+/**
+ * 新UI
+ */
+_p[28] = {
+    value: function(require) {
+        var kity = _p.r(21), Utils = _p.r(4), config = _p.r(22), FUI = _p.r(14), VIEW_STATE = _p.r(23).VIEW_STATE, Scrollbar = _p.r(27), UIComponent = kity.createClass("UIComponent", {
+            constructor: function(kfEditor, options) {
+                var currentDocument = null;
+                this.options = options;
+                this.container = kfEditor.getContainer();
+                currentDocument = this.container.ownerDocument;
+                // ui组件实例集合
+                this.components = {};
+                this.canvasRect = null;
+                this.viewState = VIEW_STATE.NO_OVERFLOW;
+                this.latexInput = null;
+                this.kfEditor = kfEditor;
+                this.toolbarWidget = FUI.Creator.parse(config);
+                this.editArea = new FUI.Panel({
+                    className: "kf-editor-ui-editor-area"
+                });
+                this.canvasContainer = new FUI.Panel({
+                    className: "kf-editor-ui-canvas"
+                });
+                this.scrollbarContainer = new FUI.Panel({
+                    className: "kf-editor-edit-scrollbar"
+                });
+                this.latexArea = new FUI.Panel({
+                    className: "kf-editor-ui-latex-area"
+                });
+                this.latexInput = creatLatexInput(currentDocument);
+                this.latexArea.getContentElement().appendChild(this.latexInput);
+                this.scrollbarContainer = createScrollbarContainer(currentDocument);
+                this.toolbarWidget.appendTo(this.container);
+                this.latexArea.appendTo(this.editArea);
+                this.canvasContainer.appendTo(this.editArea);
+                this.editArea.appendTo(this.container);
+                this.container.appendChild(this.scrollbarContainer);
+                this.canvasContainer = this.canvasContainer.getContentElement();
+                this.editArea = this.editArea.getContentElement();
+                this.initComponents();
+                this.initServices();
+                this.initEvent();
+                this.updateContainerSize(this.container, this.toolbarWidget.getContentElement(), this.editArea);
+                this.initScrollEvent();
+            },
+            // 组件实例化
+            initComponents: function() {
+                this.components.scrollbar = new Scrollbar(this, this.kfEditor);
+            },
+            updateContainerSize: function(container, toolbar, editArea) {
+                var containerBox = container.getBoundingClientRect(), toolbarBox = toolbar.getBoundingClientRect();
+                editArea.style.width = containerBox.width + "px";
+                editArea.style.height = containerBox.bottom - toolbarBox.bottom + "px";
+            },
+            // 初始化服务
+            initServices: function() {
+                this.kfEditor.registerService("ui.get.canvas.container", this, {
+                    getCanvasContainer: this.getCanvasContainer
+                });
+                this.kfEditor.registerService("ui.get.latex.input", this, {
+                    getLatexInput: this.getLatexInput
+                });
+                this.kfEditor.registerService("ui.update.canvas.view", this, {
+                    updateCanvasView: this.updateCanvasView
+                });
+                this.kfEditor.registerService("ui.canvas.container.event", this, {
+                    on: this.addEvent,
+                    off: this.removeEvent,
+                    trigger: this.trigger,
+                    fire: this.trigger
+                });
+                this.kfEditor.registerService("ui.toolbar.disable", this, {
+                    disableToolbar: this.disableToolbar
+                });
+                this.kfEditor.registerService("ui.toolbar.enable", this, {
+                    enableToolbar: this.enableToolbar
+                });
+                this.kfEditor.registerService("ui.toolbar.close", this, {
+                    closeToolbar: this.closeToolbar
+                });
+            },
+            initEvent: function() {
+                var editor = this.kfEditor;
+                Utils.addEvent(this.container, "mousewheel", function(e) {
+                    e.preventDefault();
+                });
+                this.toolbarWidget.on("btnclick", function(e) {
+                    var val = e.widget.getValue();
+                    if (val) {
+                        editor.requestService("control.insert.string", val);
+                    }
+                });
+            },
+            initScrollEvent: function() {
+                var _self = this;
+                this.kfEditor.requestService("ui.set.scrollbar.update.handler", function(proportion, offset, values) {
+                    offset = Math.floor(proportion * (values.contentWidth - values.viewWidth));
+                    _self.kfEditor.requestService("render.set.canvas.offset", offset);
+                });
+            },
+            getCanvasContainer: function() {
+                return this.canvasContainer;
+            },
+            addEvent: function(type, handler) {
+                Utils.addEvent(this.canvasContainer, type, handler);
+            },
+            removeEvent: function() {},
+            trigger: function(type) {
+                Utils.trigger(this.canvasContainer, type);
+            },
+            getLatexInput: function() {
+                return this.latexInput;
+            },
+            // 更新画布视窗， 决定是否出现滚动条
+            updateCanvasView: function() {
+                var canvas = this.kfEditor.requestService("render.get.canvas"), contentContainer = canvas.getContentContainer(), contentRect = null;
+                if (this.canvasRect === null) {
+                    // 兼容firfox， 获取容器大小，而不是获取画布大小
+                    this.canvasRect = this.canvasContainer.getBoundingClientRect();
+                }
+                contentRect = contentContainer.getRenderBox("paper");
+                if (contentRect.width > this.canvasRect.width) {
+                    if (this.viewState === VIEW_STATE.NO_OVERFLOW) {
+                        this.toggleViewState();
+                        this.kfEditor.requestService("ui.show.scrollbar");
+                        this.kfEditor.requestService("render.disable.relocation");
+                    }
+                    this.kfEditor.requestService("render.relocation");
+                    // 更新滚动条， 参数是：滚动条所控制的内容长度
+                    this.kfEditor.requestService("ui.update.scrollbar", contentRect.width);
+                    this.kfEditor.requestService("ui.relocation.scrollbar");
+                } else {
+                    if (this.viewState === VIEW_STATE.OVERFLOW) {
+                        this.toggleViewState();
+                        this.kfEditor.requestService("ui.hide.scrollbar");
+                        this.kfEditor.requestService("render.enable.relocation");
+                    }
+                    this.kfEditor.requestService("render.relocation");
+                }
+            },
+            toggleViewState: function() {
+                this.viewState = this.viewState === VIEW_STATE.NO_OVERFLOW ? VIEW_STATE.OVERFLOW : VIEW_STATE.NO_OVERFLOW;
+            },
+            disableToolbar: function() {
+                this.toolbarWidget.disable();
+            },
+            enableToolbar: function() {
+                this.toolbarWidget.enable();
+            },
+            closeToolbar: function() {}
+        });
+        function createScrollbarContainer(doc) {
+            var container = doc.createElement("div");
+            container.className = "kf-editor-edit-scrollbar";
+            return container;
+        }
+        function creatLatexInput(doc) {
+            var container = doc.createElement("input");
+            container.className = "kf-editor-latex-input";
+            return container;
+        }
+        return UIComponent;
+    }
+};
+
+/**
  * 数学公式解析器
  */
-_p[21] = {
+_p[29] = {
     value: function(require) {
-        var KFParser = _p.r(19).Parser, kity = _p.r(20), CURSOR_CHAR = _p.r(29).cursorCharacter, VGROUP_LIST = _p.r(22), ROOT_P_TEXT = _p.r(29).rootPlaceholder.content, COMBINATION_NAME = "combination", PID_PREFIX = "_kf_editor_", GROUP_TYPE = _p.r(11), PID = 0;
+        var KFParser = _p.r(20).Parser, kity = _p.r(21), CURSOR_CHAR = _p.r(37).cursorCharacter, VGROUP_LIST = _p.r(30), ROOT_P_TEXT = _p.r(37).rootPlaceholder.content, COMBINATION_NAME = "combination", PID_PREFIX = "_kf_editor_", GROUP_TYPE = _p.r(11), PID = 0;
         var Parser = kity.createClass("Parser", {
             constructor: function(kfEditor) {
                 this.kfEditor = kfEditor;
@@ -1398,7 +1975,7 @@ _p[21] = {
             },
             // 初始化KF扩展
             initKFormulExtension: function() {
-                _p.r(17).ext(this);
+                _p.r(18).ext(this);
             },
             resetGroupId: function() {
                 this.groupRecord = 0;
@@ -1524,7 +2101,7 @@ _p[21] = {
 /*!
  * 虚拟组列表
  */
-_p[22] = {
+_p[30] = {
     value: function() {
         return {
             radical: true,
@@ -1544,9 +2121,9 @@ _p[22] = {
 /*!
  * 定位模块
  */
-_p[23] = {
+_p[31] = {
     value: function(require) {
-        var kity = _p.r(20), kfUtils = _p.r(4), PositionComponenet = kity.createClass("PositionComponenet", {
+        var kity = _p.r(21), kfUtils = _p.r(4), PositionComponenet = kity.createClass("PositionComponenet", {
             constructor: function(kfEditor) {
                 this.kfEditor = kfEditor;
                 this.initServices();
@@ -1702,9 +2279,9 @@ _p[23] = {
 /*!
  * 打印服务
  */
-_p[24] = {
+_p[32] = {
     value: function(require) {
-        var kity = _p.r(20);
+        var kity = _p.r(21);
         return kity.createClass("Printer", {
             constructor: function(kfEditor) {
                 this.kfEditor = kfEditor;
@@ -1762,9 +2339,9 @@ _p[24] = {
 /**
  * Created by hn on 14-3-17.
  */
-_p[25] = {
+_p[33] = {
     value: function(require) {
-        var kity = _p.r(20), Assembly = _p.r(19).Assembly, DEFAULT_OPTIONS = {
+        var kity = _p.r(21), Assembly = _p.r(20).Assembly, DEFAULT_OPTIONS = {
             autoresize: false,
             fontsize: 50,
             padding: [ 20, 50 ]
@@ -1777,6 +2354,7 @@ _p[25] = {
                 this.kfEditor = kfEditor;
                 this.assembly = null;
                 this.formula = null;
+                this.__cbList = [];
                 // 是否禁用重定位
                 this.relDisabled = false;
                 this.canvasZoom = 1;
@@ -1882,6 +2460,7 @@ _p[25] = {
                     this.kfEditor.requestService("control.set.source", str);
                     this.kfEditor.requestService("ui.update.canvas.view");
                 });
+                this.kfEditor.registerCommand("register.render.listener", this, this.registerListener);
                 this.kfEditor.registerCommand("getPaper", this, this.getPaper);
             },
             relocation: function() {
@@ -1900,6 +2479,9 @@ _p[25] = {
                 var formulaSpace = this.formula.container.getRenderBox();
                 this.formula.container.setTranslate(0, -formulaSpace.height / 2);
                 this.setCanvasOffset(0);
+            },
+            registerListener: function(cb) {
+                this.__cbList.push(cb);
             },
             selectGroup: function(groupId) {
                 var groupObject = this.kfEditor.requestService("syntax.get.group.object", groupId);
@@ -2060,9 +2642,9 @@ _p[25] = {
 /*！
  * 删除控制
  */
-_p[26] = {
+_p[34] = {
     value: function(require, exports, module) {
-        var kity = _p.r(20);
+        var kity = _p.r(21);
         return kity.createClass("DeleteComponent", {
             constructor: function(parentComponent, kfEditor) {
                 this.parentComponent = parentComponent;
@@ -2118,6 +2700,36 @@ _p[26] = {
                             return false;
                         }
                     } else {
+                        var tmpCursorInfo = this.selectParentContainer(cursorInfo.groupId), isPlaceholder = false, tmpCurrentTree = null, tmpTree = objTree.mapping[tmpCursorInfo.groupId].strGroup;
+                        // cases语句删除
+                        if (tmpTree.name === "cases") {
+                            tmpCurrentTree = tmpTree.operand[tmpCursorInfo.startOffset];
+                            while (tmpCurrentTree.operand && tmpCurrentTree.operand.length > 0) {
+                                isPlaceholder = tmpCurrentTree.operand[0].name === "placeholder";
+                                if (isPlaceholder) {
+                                    break;
+                                }
+                                tmpCurrentTree = tmpCurrentTree.operand[0];
+                            }
+                            if (isPlaceholder) {
+                                // 选中整个表达式
+                                if (tmpTree.operand.length === 1) {
+                                    tmpCursorInfo = this.selectParentContainer(cursorInfo.groupId);
+                                    tmpCursorInfo = this.selectParentContainer(tmpCursorInfo.groupId);
+                                    this.parentComponent.updateCursor(tmpCursorInfo);
+                                    return false;
+                                }
+                                tmpTree.operand.splice(tmpCursorInfo.startOffset, 1);
+                                if (tmpCursorInfo.startOffset > 0) {
+                                    tmpCursorInfo.startOffset -= 1;
+                                    tmpCursorInfo.endOffset -= 1;
+                                }
+                                this.parentComponent.updateCursor(tmpCursorInfo);
+                                return true;
+                            } else {
+                                return this.deleteSelection(currentTree, cursorInfo);
+                            }
+                        }
                         return this.deleteSelection(currentTree, cursorInfo);
                     }
                 }
@@ -2177,9 +2789,9 @@ _p[26] = {
 /*！
  * 光标移动控制
  */
-_p[27] = {
+_p[35] = {
     value: function(require, exports, module) {
-        var kity = _p.r(20), DIRECTION = {
+        var kity = _p.r(21), DIRECTION = {
             LEFT: "left",
             RIGHT: "right"
         };
@@ -2525,9 +3137,9 @@ _p[27] = {
 /*!
  * 语法控制单元
  */
-_p[28] = {
+_p[36] = {
     value: function(require) {
-        var kity = _p.r(20), MoveComponent = _p.r(27), DeleteComponent = _p.r(26), CURSOR_CHAR = _p.r(29).cursorCharacter, GROUP_TYPE = _p.r(11), SyntaxComponenet = kity.createClass("SyntaxComponenet", {
+        var kity = _p.r(21), MoveComponent = _p.r(35), DeleteComponent = _p.r(34), CURSOR_CHAR = _p.r(37).cursorCharacter, GROUP_TYPE = _p.r(11), SyntaxComponenet = kity.createClass("SyntaxComponenet", {
             constructor: function(kfEditor) {
                 this.kfEditor = kfEditor;
                 // 数据记录表
@@ -2852,7 +3464,7 @@ _p[28] = {
 /*!
  * 系统配置文件
  */
-_p[29] = {
+_p[37] = {
     value: function() {
         return {
             // 光标符号
@@ -2872,4272 +3484,26 @@ _p[29] = {
     }
 };
 
-/**
- * 特殊字符区域的icon位置数据
- */
-_p[30] = {
-    value: function() {
-        return {
-            "\\pm": {
-                x: 5,
-                y: 0
-            },
-            "\\infty": {
-                x: 42,
-                y: 0
-            },
-            "=": {
-                x: 79,
-                y: 0
-            },
-            "\\sim": {
-                x: 116,
-                y: 0
-            },
-            "\\times": {
-                x: 153,
-                y: 0
-            },
-            "\\div": {
-                x: 190,
-                y: 0
-            },
-            "!": {
-                x: 227,
-                y: 0
-            },
-            "<": {
-                x: 264,
-                y: 0
-            },
-            "\\ll": {
-                x: 301,
-                y: 0
-            },
-            ">": {
-                x: 338,
-                y: 0
-            },
-            "\\gg": {
-                x: 375,
-                y: 0
-            },
-            "\\leq": {
-                x: 412,
-                y: 0
-            },
-            "\\geq": {
-                x: 449,
-                y: 0
-            },
-            "\\mp": {
-                x: 486,
-                y: 0
-            },
-            "\\cong": {
-                x: 523,
-                y: 0
-            },
-            "\\equiv": {
-                x: 560,
-                y: 0
-            },
-            "\\propto": {
-                x: 597,
-                y: 0
-            },
-            "\\approx": {
-                x: 634,
-                y: 0
-            },
-            "\\forall": {
-                x: 671,
-                y: 0
-            },
-            "\\partial": {
-                x: 708,
-                y: 0
-            },
-            "\\surd": {
-                x: 745,
-                y: 0
-            },
-            "\\cup": {
-                x: 782,
-                y: 0
-            },
-            "\\cap": {
-                x: 819,
-                y: 0
-            },
-            "\\varnothing": {
-                x: 856,
-                y: 0
-            },
-            "%": {
-                x: 893,
-                y: 0
-            },
-            "\\circ": {
-                x: 930,
-                y: 0
-            },
-            "\\exists": {
-                x: 967,
-                y: 0
-            },
-            "\\nexists": {
-                x: 1004,
-                y: 0
-            },
-            "\\in": {
-                x: 1041,
-                y: 0
-            },
-            "\\ni": {
-                x: 1078,
-                y: 0
-            },
-            "\\gets": {
-                x: 5,
-                y: 37
-            },
-            "\\uparrow": {
-                x: 42,
-                y: 37
-            },
-            "\\to": {
-                x: 79,
-                y: 37
-            },
-            "\\downarrow": {
-                x: 116,
-                y: 37
-            },
-            "\\leftrightarrow": {
-                x: 153,
-                y: 37
-            },
-            "\\therefore": {
-                x: 190,
-                y: 37
-            },
-            "\\because": {
-                x: 227,
-                y: 37
-            },
-            "+": {
-                x: 264,
-                y: 37
-            },
-            "-": {
-                x: 301,
-                y: 37
-            },
-            "\\neg": {
-                x: 338,
-                y: 37
-            },
-            "\\ast": {
-                x: 375,
-                y: 37
-            },
-            "\\cdot": {
-                x: 412,
-                y: 37
-            },
-            "\\vdots": {
-                x: 449,
-                y: 37
-            },
-            "\\ddots": {
-                x: 486,
-                y: 37
-            },
-            "\\aleph": {
-                x: 523,
-                y: 37
-            },
-            "\\beth": {
-                x: 560,
-                y: 37
-            },
-            "\\blacksquare": {
-                x: 597,
-                y: 37
-            },
-            "\\alpha": {
-                x: 634,
-                y: 37
-            },
-            "\\beta": {
-                x: 671,
-                y: 37
-            },
-            "\\gamma": {
-                x: 708,
-                y: 37
-            },
-            "\\delta": {
-                x: 745,
-                y: 37
-            },
-            "\\epsilon": {
-                x: 782,
-                y: 37
-            },
-            "\\zeta": {
-                x: 819,
-                y: 37
-            },
-            "\\eta": {
-                x: 856,
-                y: 37
-            },
-            "\\theta": {
-                x: 893,
-                y: 37
-            },
-            "\\iota": {
-                x: 930,
-                y: 37
-            },
-            "\\kappa": {
-                x: 967,
-                y: 37
-            },
-            "\\lambda": {
-                x: 1004,
-                y: 37
-            },
-            "\\mu": {
-                x: 1041,
-                y: 37
-            },
-            "\\nu": {
-                x: 1078,
-                y: 37
-            },
-            "\\xi": {
-                x: 5,
-                y: 74
-            },
-            "\\omicron": {
-                x: 42,
-                y: 74
-            },
-            "\\pi": {
-                x: 79,
-                y: 74
-            },
-            "\\rho": {
-                x: 116,
-                y: 74
-            },
-            "\\sigma": {
-                x: 153,
-                y: 74
-            },
-            "\\tau": {
-                x: 190,
-                y: 74
-            },
-            "\\upsilon": {
-                x: 227,
-                y: 74
-            },
-            "\\phi": {
-                x: 264,
-                y: 74
-            },
-            "\\chi": {
-                x: 301,
-                y: 74
-            },
-            "\\psi": {
-                x: 338,
-                y: 74
-            },
-            "\\omega": {
-                x: 375,
-                y: 74
-            },
-            "\\Alpha": {
-                x: 412,
-                y: 74
-            },
-            "\\Beta": {
-                x: 449,
-                y: 74
-            },
-            "\\Gamma": {
-                x: 486,
-                y: 74
-            },
-            "\\Delta": {
-                x: 523,
-                y: 74
-            },
-            "\\Epsilon": {
-                x: 560,
-                y: 74
-            },
-            "\\Zeta": {
-                x: 597,
-                y: 74
-            },
-            "\\Eta": {
-                x: 634,
-                y: 74
-            },
-            "\\Theta": {
-                x: 671,
-                y: 74
-            },
-            "\\Iota": {
-                x: 708,
-                y: 74
-            },
-            "\\Kappa": {
-                x: 745,
-                y: 74
-            },
-            "\\Lambda": {
-                x: 782,
-                y: 74
-            },
-            "\\Mu": {
-                x: 819,
-                y: 74
-            },
-            "\\Nu": {
-                x: 856,
-                y: 74
-            },
-            "\\Xi": {
-                x: 893,
-                y: 74
-            },
-            "\\Omicron": {
-                x: 930,
-                y: 74
-            },
-            "\\Pi": {
-                x: 967,
-                y: 74
-            },
-            "\\Rho": {
-                x: 1004,
-                y: 74
-            },
-            "\\Sigma": {
-                x: 1041,
-                y: 74
-            },
-            "\\Tau": {
-                x: 1078,
-                y: 74
-            },
-            "\\Upsilon": {
-                x: 5,
-                y: 111
-            },
-            "\\Phi": {
-                x: 42,
-                y: 111
-            },
-            "\\Chi": {
-                x: 79,
-                y: 111
-            },
-            "\\Psi": {
-                x: 116,
-                y: 111
-            },
-            "\\Omega": {
-                x: 153,
-                y: 111
-            },
-            "\\digamma": {
-                x: 190,
-                y: 111
-            },
-            "\\varepsilon": {
-                x: 227,
-                y: 111
-            },
-            "\\varkappa": {
-                x: 264,
-                y: 111
-            },
-            "\\varphi": {
-                x: 301,
-                y: 111
-            },
-            "\\varpi": {
-                x: 338,
-                y: 111
-            },
-            "\\varrho": {
-                x: 375,
-                y: 111
-            },
-            "\\varsigma": {
-                x: 412,
-                y: 111
-            },
-            "\\vartheta": {
-                x: 449,
-                y: 111
-            },
-            "\\neq": {
-                x: 486,
-                y: 111
-            },
-            "\\nless": {
-                x: 523,
-                y: 111
-            },
-            "\\ngtr": {
-                x: 560,
-                y: 111
-            },
-            "\\nleq": {
-                x: 597,
-                y: 111
-            },
-            "\\ngeq": {
-                x: 634,
-                y: 111
-            },
-            "\\nsim": {
-                x: 671,
-                y: 111
-            },
-            "\\lneqq": {
-                x: 708,
-                y: 111
-            },
-            "\\gneqq": {
-                x: 745,
-                y: 111
-            },
-            "\\nprec": {
-                x: 782,
-                y: 111
-            },
-            "\\nsucc": {
-                x: 819,
-                y: 111
-            },
-            "\\notin": {
-                x: 856,
-                y: 111
-            },
-            "\\nsubseteq": {
-                x: 893,
-                y: 111
-            },
-            "\\nsupseteq": {
-                x: 930,
-                y: 111
-            },
-            "\\subsetneq": {
-                x: 967,
-                y: 111
-            },
-            "\\supsetneq": {
-                x: 1004,
-                y: 111
-            },
-            "\\lnsim": {
-                x: 1041,
-                y: 111
-            },
-            "\\gnsim": {
-                x: 1078,
-                y: 111
-            },
-            "\\precnsim": {
-                x: 5,
-                y: 148
-            },
-            "\\succnsim": {
-                x: 42,
-                y: 148
-            },
-            "\\ntriangleleft": {
-                x: 79,
-                y: 148
-            },
-            "\\ntriangleright": {
-                x: 116,
-                y: 148
-            },
-            "\\ntrianglelefteq": {
-                x: 153,
-                y: 148
-            },
-            "\\ntrianglerighteq": {
-                x: 190,
-                y: 148
-            },
-            "\\nmid": {
-                x: 227,
-                y: 148
-            },
-            "\\nparallel": {
-                x: 264,
-                y: 148
-            },
-            "\\nvdash": {
-                x: 301,
-                y: 148
-            },
-            "\\nVdash": {
-                x: 338,
-                y: 148
-            },
-            "\\nvDash": {
-                x: 375,
-                y: 148
-            },
-            "\\nVDash": {
-                x: 412,
-                y: 148
-            },
-            "\\daleth": {
-                x: 449,
-                y: 148
-            },
-            "\\gimel": {
-                x: 486,
-                y: 148
-            },
-            "\\complement": {
-                x: 523,
-                y: 148
-            },
-            "\\ell": {
-                x: 560,
-                y: 148
-            },
-            "\\eth": {
-                x: 597,
-                y: 148
-            },
-            "\\hbar": {
-                x: 634,
-                y: 148
-            },
-            "\\hslash": {
-                x: 671,
-                y: 148
-            },
-            "\\mho": {
-                x: 708,
-                y: 148
-            },
-            "\\wp": {
-                x: 745,
-                y: 148
-            },
-            "\\circledS": {
-                x: 782,
-                y: 148
-            },
-            "\\Bbbk": {
-                x: 819,
-                y: 148
-            },
-            "\\Finv": {
-                x: 856,
-                y: 148
-            },
-            "\\Game": {
-                x: 893,
-                y: 148
-            },
-            "\\Im": {
-                x: 930,
-                y: 148
-            },
-            "\\Re": {
-                x: 967,
-                y: 148
-            },
-            "\\updownarrow": {
-                x: 1004,
-                y: 148
-            },
-            "\\Leftarrow": {
-                x: 1041,
-                y: 148
-            },
-            "\\Rightarrow": {
-                x: 1078,
-                y: 148
-            },
-            "\\Uparrow": {
-                x: 5,
-                y: 185
-            },
-            "\\Downarrow": {
-                x: 42,
-                y: 185
-            },
-            "\\Leftrightarrow": {
-                x: 79,
-                y: 185
-            },
-            "\\Updownarrow": {
-                x: 116,
-                y: 185
-            },
-            "\\longleftarrow": {
-                x: 153,
-                y: 185
-            },
-            "\\longrightarrow": {
-                x: 190,
-                y: 185
-            },
-            "\\longleftrightarrow": {
-                x: 227,
-                y: 185
-            },
-            "\\Longleftarrow": {
-                x: 264,
-                y: 185
-            },
-            "\\Longrightarrow": {
-                x: 301,
-                y: 185
-            },
-            "\\Longleftrightarrow": {
-                x: 338,
-                y: 185
-            },
-            "\\nearrow": {
-                x: 375,
-                y: 185
-            },
-            "\\nwarrow": {
-                x: 412,
-                y: 185
-            },
-            "\\searrow": {
-                x: 449,
-                y: 185
-            },
-            "\\swarrow": {
-                x: 486,
-                y: 185
-            },
-            "\\nleftarrow": {
-                x: 523,
-                y: 185
-            },
-            "\\nrightarrow": {
-                x: 560,
-                y: 185
-            },
-            "\\nLeftarrow": {
-                x: 597,
-                y: 185
-            },
-            "\\nRightarrow": {
-                x: 634,
-                y: 185
-            },
-            "\\nLeftrightarrow": {
-                x: 671,
-                y: 185
-            },
-            "\\leftharpoonup": {
-                x: 708,
-                y: 185
-            },
-            "\\leftharpoondown": {
-                x: 745,
-                y: 185
-            },
-            "\\rightharpoonup": {
-                x: 782,
-                y: 185
-            },
-            "\\rightharpoondown": {
-                x: 819,
-                y: 185
-            },
-            "\\upharpoonleft": {
-                x: 856,
-                y: 185
-            },
-            "\\upharpoonright": {
-                x: 893,
-                y: 185
-            },
-            "\\downharpoonleft": {
-                x: 930,
-                y: 185
-            },
-            "\\downharpoonright": {
-                x: 967,
-                y: 185
-            },
-            "\\leftrightharpoons": {
-                x: 1004,
-                y: 185
-            },
-            "\\rightleftharpoons": {
-                x: 1041,
-                y: 185
-            },
-            "\\leftleftarrows": {
-                x: 1078,
-                y: 185
-            },
-            "\\rightrightarrows": {
-                x: 5,
-                y: 222
-            },
-            "\\upuparrows": {
-                x: 42,
-                y: 222
-            },
-            "\\downdownarrows": {
-                x: 79,
-                y: 222
-            },
-            "\\leftrightarrows": {
-                x: 116,
-                y: 222
-            },
-            "\\rightleftarrows": {
-                x: 153,
-                y: 222
-            },
-            "\\looparrowleft": {
-                x: 190,
-                y: 222
-            },
-            "\\looparrowright": {
-                x: 227,
-                y: 222
-            },
-            "\\leftarrowtail": {
-                x: 264,
-                y: 222
-            },
-            "\\rightarrowtail": {
-                x: 301,
-                y: 222
-            },
-            "\\Lsh": {
-                x: 338,
-                y: 222
-            },
-            "\\Rsh": {
-                x: 375,
-                y: 222
-            },
-            "\\Lleftarrow": {
-                x: 412,
-                y: 222
-            },
-            "\\Rrightarrow": {
-                x: 449,
-                y: 222
-            },
-            "\\curvearrowleft": {
-                x: 486,
-                y: 222
-            },
-            "\\curvearrowright": {
-                x: 523,
-                y: 222
-            },
-            "\\circlearrowleft": {
-                x: 560,
-                y: 222
-            },
-            "\\circlearrowright": {
-                x: 597,
-                y: 222
-            },
-            "\\multimap": {
-                x: 634,
-                y: 222
-            },
-            "\\leftrightsquigarrow": {
-                x: 671,
-                y: 222
-            },
-            "\\twoheadleftarrow": {
-                x: 708,
-                y: 222
-            },
-            "\\twoheadrightarrow": {
-                x: 745,
-                y: 222
-            },
-            "\\rightsquigarrow": {
-                x: 782,
-                y: 222
-            },
-            "\\mathcal{A}": {
-                x: 819,
-                y: 222
-            },
-            "\\mathcal{B}": {
-                x: 856,
-                y: 222
-            },
-            "\\mathcal{C}": {
-                x: 893,
-                y: 222
-            },
-            "\\mathcal{D}": {
-                x: 930,
-                y: 222
-            },
-            "\\mathcal{E}": {
-                x: 967,
-                y: 222
-            },
-            "\\mathcal{F}": {
-                x: 1004,
-                y: 222
-            },
-            "\\mathcal{G}": {
-                x: 1041,
-                y: 222
-            },
-            "\\mathcal{H}": {
-                x: 1078,
-                y: 222
-            },
-            "\\mathcal{I}": {
-                x: 5,
-                y: 259
-            },
-            "\\mathcal{J}": {
-                x: 42,
-                y: 259
-            },
-            "\\mathcal{K}": {
-                x: 79,
-                y: 259
-            },
-            "\\mathcal{L}": {
-                x: 116,
-                y: 259
-            },
-            "\\mathcal{M}": {
-                x: 153,
-                y: 259
-            },
-            "\\mathcal{N}": {
-                x: 190,
-                y: 259
-            },
-            "\\mathcal{O}": {
-                x: 227,
-                y: 259
-            },
-            "\\mathcal{P}": {
-                x: 264,
-                y: 259
-            },
-            "\\mathcal{Q}": {
-                x: 301,
-                y: 259
-            },
-            "\\mathcal{R}": {
-                x: 338,
-                y: 259
-            },
-            "\\mathcal{S}": {
-                x: 375,
-                y: 259
-            },
-            "\\mathcal{T}": {
-                x: 412,
-                y: 259
-            },
-            "\\mathcal{U}": {
-                x: 449,
-                y: 259
-            },
-            "\\mathcal{V}": {
-                x: 486,
-                y: 259
-            },
-            "\\mathcal{W}": {
-                x: 523,
-                y: 259
-            },
-            "\\mathcal{X}": {
-                x: 560,
-                y: 259
-            },
-            "\\mathcal{Y}": {
-                x: 597,
-                y: 259
-            },
-            "\\mathcal{Z}": {
-                x: 634,
-                y: 259
-            },
-            "\\mathfrak{A}": {
-                x: 671,
-                y: 259
-            },
-            "\\mathfrak{B}": {
-                x: 708,
-                y: 259
-            },
-            "\\mathfrak{C}": {
-                x: 745,
-                y: 259
-            },
-            "\\mathfrak{D}": {
-                x: 782,
-                y: 259
-            },
-            "\\mathfrak{E}": {
-                x: 819,
-                y: 259
-            },
-            "\\mathfrak{F}": {
-                x: 856,
-                y: 259
-            },
-            "\\mathfrak{G}": {
-                x: 893,
-                y: 259
-            },
-            "\\mathfrak{H}": {
-                x: 930,
-                y: 259
-            },
-            "\\mathfrak{I}": {
-                x: 967,
-                y: 259
-            },
-            "\\mathfrak{J}": {
-                x: 1004,
-                y: 259
-            },
-            "\\mathfrak{K}": {
-                x: 1041,
-                y: 259
-            },
-            "\\mathfrak{L}": {
-                x: 1078,
-                y: 259
-            },
-            "\\mathfrak{M}": {
-                x: 5,
-                y: 296
-            },
-            "\\mathfrak{N}": {
-                x: 42,
-                y: 296
-            },
-            "\\mathfrak{O}": {
-                x: 79,
-                y: 296
-            },
-            "\\mathfrak{P}": {
-                x: 116,
-                y: 296
-            },
-            "\\mathfrak{Q}": {
-                x: 153,
-                y: 296
-            },
-            "\\mathfrak{R}": {
-                x: 190,
-                y: 296
-            },
-            "\\mathfrak{S}": {
-                x: 227,
-                y: 296
-            },
-            "\\mathfrak{T}": {
-                x: 264,
-                y: 296
-            },
-            "\\mathfrak{U}": {
-                x: 301,
-                y: 296
-            },
-            "\\mathfrak{V}": {
-                x: 338,
-                y: 296
-            },
-            "\\mathfrak{W}": {
-                x: 375,
-                y: 296
-            },
-            "\\mathfrak{X}": {
-                x: 412,
-                y: 296
-            },
-            "\\mathfrak{Y}": {
-                x: 449,
-                y: 296
-            },
-            "\\mathfrak{Z}": {
-                x: 486,
-                y: 296
-            },
-            "\\mathfrak{a}": {
-                x: 523,
-                y: 296
-            },
-            "\\mathfrak{b}": {
-                x: 560,
-                y: 296
-            },
-            "\\mathfrak{c}": {
-                x: 597,
-                y: 296
-            },
-            "\\mathfrak{d}": {
-                x: 634,
-                y: 296
-            },
-            "\\mathfrak{e}": {
-                x: 671,
-                y: 296
-            },
-            "\\mathfrak{f}": {
-                x: 708,
-                y: 296
-            },
-            "\\mathfrak{g}": {
-                x: 745,
-                y: 296
-            },
-            "\\mathfrak{h}": {
-                x: 782,
-                y: 296
-            },
-            "\\mathfrak{i}": {
-                x: 819,
-                y: 296
-            },
-            "\\mathfrak{j}": {
-                x: 856,
-                y: 296
-            },
-            "\\mathfrak{k}": {
-                x: 893,
-                y: 296
-            },
-            "\\mathfrak{l}": {
-                x: 930,
-                y: 296
-            },
-            "\\mathfrak{m}": {
-                x: 967,
-                y: 296
-            },
-            "\\mathfrak{n}": {
-                x: 1004,
-                y: 296
-            },
-            "\\mathfrak{o}": {
-                x: 1041,
-                y: 296
-            },
-            "\\mathfrak{p}": {
-                x: 1078,
-                y: 296
-            },
-            "\\mathfrak{q}": {
-                x: 5,
-                y: 333
-            },
-            "\\mathfrak{r}": {
-                x: 42,
-                y: 333
-            },
-            "\\mathfrak{s}": {
-                x: 79,
-                y: 333
-            },
-            "\\mathfrak{t}": {
-                x: 116,
-                y: 333
-            },
-            "\\mathfrak{u}": {
-                x: 153,
-                y: 333
-            },
-            "\\mathfrak{v}": {
-                x: 190,
-                y: 333
-            },
-            "\\mathfrak{w}": {
-                x: 227,
-                y: 333
-            },
-            "\\mathfrak{x}": {
-                x: 264,
-                y: 333
-            },
-            "\\mathfrak{y}": {
-                x: 301,
-                y: 333
-            },
-            "\\mathfrak{z}": {
-                x: 338,
-                y: 333
-            },
-            "\\mathbb{A}": {
-                x: 375,
-                y: 333
-            },
-            "\\mathbb{B}": {
-                x: 412,
-                y: 333
-            },
-            "\\mathbb{C}": {
-                x: 449,
-                y: 333
-            },
-            "\\mathbb{D}": {
-                x: 486,
-                y: 333
-            },
-            "\\mathbb{E}": {
-                x: 523,
-                y: 333
-            },
-            "\\mathbb{F}": {
-                x: 560,
-                y: 333
-            },
-            "\\mathbb{G}": {
-                x: 597,
-                y: 333
-            },
-            "\\mathbb{H}": {
-                x: 634,
-                y: 333
-            },
-            "\\mathbb{I}": {
-                x: 671,
-                y: 333
-            },
-            "\\mathbb{J}": {
-                x: 708,
-                y: 333
-            },
-            "\\mathbb{K}": {
-                x: 745,
-                y: 333
-            },
-            "\\mathbb{L}": {
-                x: 782,
-                y: 333
-            },
-            "\\mathbb{M}": {
-                x: 819,
-                y: 333
-            },
-            "\\mathbb{N}": {
-                x: 856,
-                y: 333
-            },
-            "\\mathbb{O}": {
-                x: 893,
-                y: 333
-            },
-            "\\mathbb{P}": {
-                x: 930,
-                y: 333
-            },
-            "\\mathbb{Q}": {
-                x: 967,
-                y: 333
-            },
-            "\\mathbb{R}": {
-                x: 1004,
-                y: 333
-            },
-            "\\mathbb{S}": {
-                x: 1041,
-                y: 333
-            },
-            "\\mathbb{T}": {
-                x: 1078,
-                y: 333
-            },
-            "\\mathbb{U}": {
-                x: 5,
-                y: 370
-            },
-            "\\mathbb{V}": {
-                x: 42,
-                y: 370
-            },
-            "\\mathbb{W}": {
-                x: 79,
-                y: 370
-            },
-            "\\mathbb{X}": {
-                x: 116,
-                y: 370
-            },
-            "\\mathbb{Y}": {
-                x: 153,
-                y: 370
-            },
-            "\\mathbb{Z}": {
-                x: 190,
-                y: 370
-            },
-            "\\mathrm{A}": {
-                x: 227,
-                y: 370
-            },
-            "\\mathrm{B}": {
-                x: 264,
-                y: 370
-            },
-            "\\mathrm{C}": {
-                x: 301,
-                y: 370
-            },
-            "\\mathrm{D}": {
-                x: 338,
-                y: 370
-            },
-            "\\mathrm{E}": {
-                x: 375,
-                y: 370
-            },
-            "\\mathrm{F}": {
-                x: 412,
-                y: 370
-            },
-            "\\mathrm{G}": {
-                x: 449,
-                y: 370
-            },
-            "\\mathrm{H}": {
-                x: 486,
-                y: 370
-            },
-            "\\mathrm{I}": {
-                x: 523,
-                y: 370
-            },
-            "\\mathrm{J}": {
-                x: 560,
-                y: 370
-            },
-            "\\mathrm{K}": {
-                x: 597,
-                y: 370
-            },
-            "\\mathrm{L}": {
-                x: 634,
-                y: 370
-            },
-            "\\mathrm{M}": {
-                x: 671,
-                y: 370
-            },
-            "\\mathrm{N}": {
-                x: 708,
-                y: 370
-            },
-            "\\mathrm{O}": {
-                x: 745,
-                y: 370
-            },
-            "\\mathrm{P}": {
-                x: 782,
-                y: 370
-            },
-            "\\mathrm{Q}": {
-                x: 819,
-                y: 370
-            },
-            "\\mathrm{R}": {
-                x: 856,
-                y: 370
-            },
-            "\\mathrm{S}": {
-                x: 893,
-                y: 370
-            },
-            "\\mathrm{T}": {
-                x: 930,
-                y: 370
-            },
-            "\\mathrm{U}": {
-                x: 967,
-                y: 370
-            },
-            "\\mathrm{V}": {
-                x: 1004,
-                y: 370
-            },
-            "\\mathrm{W}": {
-                x: 1041,
-                y: 370
-            },
-            "\\mathrm{X}": {
-                x: 1078,
-                y: 370
-            },
-            "\\mathrm{Y}": {
-                x: 5,
-                y: 407
-            },
-            "\\mathrm{Z}": {
-                x: 42,
-                y: 407
-            },
-            "\\mathrm{a}": {
-                x: 79,
-                y: 407
-            },
-            "\\mathrm{b}": {
-                x: 116,
-                y: 407
-            },
-            "\\mathrm{c}": {
-                x: 153,
-                y: 407
-            },
-            "\\mathrm{d}": {
-                x: 190,
-                y: 407
-            },
-            "\\mathrm{e}": {
-                x: 227,
-                y: 407
-            },
-            "\\mathrm{f}": {
-                x: 264,
-                y: 407
-            },
-            "\\mathrm{g}": {
-                x: 301,
-                y: 407
-            },
-            "\\mathrm{h}": {
-                x: 338,
-                y: 407
-            },
-            "\\mathrm{i}": {
-                x: 375,
-                y: 407
-            },
-            "\\mathrm{j}": {
-                x: 412,
-                y: 407
-            },
-            "\\mathrm{k}": {
-                x: 449,
-                y: 407
-            },
-            "\\mathrm{l}": {
-                x: 486,
-                y: 407
-            },
-            "\\mathrm{m}": {
-                x: 523,
-                y: 407
-            },
-            "\\mathrm{n}": {
-                x: 560,
-                y: 407
-            },
-            "\\mathrm{o}": {
-                x: 597,
-                y: 407
-            },
-            "\\mathrm{p}": {
-                x: 634,
-                y: 407
-            },
-            "\\mathrm{q}": {
-                x: 671,
-                y: 407
-            },
-            "\\mathrm{r}": {
-                x: 708,
-                y: 407
-            },
-            "\\mathrm{s}": {
-                x: 745,
-                y: 407
-            },
-            "\\mathrm{t}": {
-                x: 782,
-                y: 407
-            },
-            "\\mathrm{u}": {
-                x: 819,
-                y: 407
-            },
-            "\\mathrm{v}": {
-                x: 856,
-                y: 407
-            },
-            "\\mathrm{w}": {
-                x: 893,
-                y: 407
-            },
-            "\\mathrm{x}": {
-                x: 930,
-                y: 407
-            },
-            "\\mathrm{y}": {
-                x: 967,
-                y: 407
-            },
-            "\\mathrm{z}": {
-                x: 1004,
-                y: 407
-            }
-        };
-    }
-};
-
-/*!
- * 滚动缩放控制器
- */
-_p[31] = {
-    value: function(require) {
-        var Utils = _p.r(4), kity = _p.r(20), DEFAULT_OPTIONS = {
-            min: 1,
-            max: 2
-        }, ScrollZoomController = kity.createClass("ScrollZoomController", {
-            constructor: function(parentComponent, kfEditor, target, options) {
-                this.kfEditor = kfEditor;
-                this.target = target;
-                this.zoom = 1;
-                this.step = .05;
-                this.options = Utils.extend({}, DEFAULT_OPTIONS, options);
-                this.initEvent();
-            },
-            initEvent: function() {
-                var kfEditor = this.kfEditor, _self = this, min = this.options.min, max = this.options.max, step = this.step;
-                Utils.addEvent(this.target, "mousewheel", function(e) {
-                    e.preventDefault();
-                    if (e.wheelDelta < 0) {
-                        // 缩小
-                        _self.zoom -= _self.zoom * step;
-                    } else {
-                        // 放大
-                        _self.zoom += _self.zoom * step;
-                    }
-                    _self.zoom = Math.max(_self.zoom, min);
-                    _self.zoom = Math.min(_self.zoom, max);
-                    kfEditor.requestService("render.set.canvas.zoom", _self.zoom);
-                });
-            }
-        });
-        return ScrollZoomController;
-    }
-};
-
-/*!
- * UI定义
- */
-_p[32] = {
-    value: function(require) {
-        return {
-            // 视窗状态
-            VIEW_STATE: {
-                // 内容未超出画布
-                NO_OVERFLOW: 0,
-                // 内容溢出
-                OVERFLOW: 1
-            },
-            scrollbar: {
-                step: 50,
-                thumbMinSize: 50
-            }
-        };
-    }
-};
-
-/**
- * 特殊字符区域之外的icon位置和大小数据
- */
-_p[33] = {
-    value: function() {
-        return {
-            "x=\\frac {-b\\pm\\sqrt {b^2-4ac}}{2a}": {
-                pos: {
-                    x: 0,
-                    y: 0
-                },
-                size: {
-                    width: 310,
-                    height: 73
-                }
-            },
-            "{\\placeholder/\\placeholder}": {
-                pos: {
-                    x: 315,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\frac \\placeholder\\placeholder": {
-                pos: {
-                    x: 376,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "a^2+b^2=c^2": {
-                pos: {
-                    x: 437,
-                    y: 0
-                },
-                size: {
-                    width: 310,
-                    height: 73
-                }
-            },
-            "{\\left(x+a\\right)}^2=\\sum^n_{k=0}{\\left(^n_k\\right)x^ka^{n-k}}": {
-                pos: {
-                    x: 752,
-                    y: 0
-                },
-                size: {
-                    width: 310,
-                    height: 73
-                }
-            },
-            "\\frac {dy}{dx}": {
-                pos: {
-                    x: 1067,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\frac {\\Delta y}{\\Delta x}": {
-                pos: {
-                    x: 1128,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\frac {\\delta y}{\\delta x}": {
-                pos: {
-                    x: 1189,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\frac \\pi 2": {
-                pos: {
-                    x: 1250,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\placeholder^\\placeholder": {
-                pos: {
-                    x: 1311,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\placeholder^\\placeholder_\\placeholder": {
-                pos: {
-                    x: 1372,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\placeholder_\\placeholder": {
-                pos: {
-                    x: 1433,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "{^\\placeholder_\\placeholder\\placeholder}": {
-                pos: {
-                    x: 1494,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "e^{-i\\omega t}": {
-                pos: {
-                    x: 1555,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "x^2": {
-                pos: {
-                    x: 1616,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "{}^n_1Y": {
-                pos: {
-                    x: 1677,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\sqrt \\placeholder": {
-                pos: {
-                    x: 1738,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\sqrt [\\placeholder] \\placeholder": {
-                pos: {
-                    x: 1799,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\sqrt [2] \\placeholder": {
-                pos: {
-                    x: 1860,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\sqrt [3] \\placeholder": {
-                pos: {
-                    x: 1921,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\frac {-b\\pm\\sqrt{b^2-4ac}}{2a}": {
-                pos: {
-                    x: 1982,
-                    y: 0
-                },
-                size: {
-                    width: 137,
-                    height: 75
-                }
-            },
-            "\\sqrt {a^2+b^2}": {
-                pos: {
-                    x: 2124,
-                    y: 0
-                },
-                size: {
-                    width: 137,
-                    height: 75
-                }
-            },
-            "\\int \\placeholder": {
-                pos: {
-                    x: 2266,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\int^\\placeholder_\\placeholder\\placeholder": {
-                pos: {
-                    x: 2327,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\iint\\placeholder": {
-                pos: {
-                    x: 2388,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\iint^\\placeholder_\\placeholder\\placeholder": {
-                pos: {
-                    x: 2449,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\iiint\\placeholder": {
-                pos: {
-                    x: 2510,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\iiint^\\placeholder_\\placeholder\\placeholder": {
-                pos: {
-                    x: 2571,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\sum\\placeholder": {
-                pos: {
-                    x: 2632,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\sum^\\placeholder_\\placeholder\\placeholder": {
-                pos: {
-                    x: 2693,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\sum_\\placeholder\\placeholder": {
-                pos: {
-                    x: 2754,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\left(\\placeholder\\right)": {
-                pos: {
-                    x: 2815,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\left[\\placeholder\\right]": {
-                pos: {
-                    x: 2876,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\left\\{\\placeholder\\right\\}": {
-                pos: {
-                    x: 2937,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\left|\\placeholder\\right|": {
-                pos: {
-                    x: 2998,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\sin\\placeholder": {
-                pos: {
-                    x: 3059,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\cos\\placeholder": {
-                pos: {
-                    x: 3120,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\tan\\placeholder": {
-                pos: {
-                    x: 3181,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\csc\\placeholder": {
-                pos: {
-                    x: 3242,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\sec\\placeholder": {
-                pos: {
-                    x: 3303,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\cot\\placeholder": {
-                pos: {
-                    x: 3364,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\sin\\theta": {
-                pos: {
-                    x: 3425,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\cos{2x}": {
-                pos: {
-                    x: 3486,
-                    y: 0
-                },
-                size: {
-                    width: 56,
-                    height: 75
-                }
-            },
-            "\\tan\\theta=\\frac {\\sin\\theta}{\\cos\\theta}": {
-                pos: {
-                    x: 3547,
-                    y: 0
-                },
-                size: {
-                    width: 137,
-                    height: 75
-                }
-            }
-        };
-    }
-};
-
-/*!
- * toolbar元素列表定义
- */
-_p[34] = {
-    value: function(require) {
-        var UI_ELE_TYPE = _p.r(41), BOX_TYPE = _p.r(40), CHAR_POSITION = _p.r(30), OTHER_POSITION = _p.r(33), kity = _p.r(20);
-        var config = [ {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "预设<br/>",
-                    className: "yushe-btn",
-                    icon: {
-                        src: "assets/images/toolbar/btn.png",
-                        x: 0,
-                        y: 0
-                    },
-                    iconSize: {
-                        w: 40
-                    }
-                },
-                box: {
-                    width: 367,
-                    group: [ {
-                        title: "预设公式",
-                        items: [ {
-                            title: "预设公式",
-                            content: [ {
-                                label: "二次公式",
-                                item: {
-                                    val: "x=\\frac {-b\\pm\\sqrt {b^2-4ac}}{2a}"
-                                }
-                            }, {
-                                label: "二项式定理",
-                                item: {
-                                    val: "{\\left(x+a\\right)}^2=\\sum^n_{k=0}{\\left(^n_k\\right)x^ka^{n-k}}"
-                                }
-                            }, {
-                                label: "勾股定理",
-                                item: {
-                                    val: "a^2+b^2=c^2"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DELIMITER
-        }, {
-            type: UI_ELE_TYPE.AREA,
-            options: {
-                box: {
-                    fixOffset: true,
-                    width: 527,
-                    type: BOX_TYPE.OVERLAP,
-                    group: [ {
-                        title: "基础数学",
-                        items: []
-                    }, {
-                        title: "希腊字母",
-                        items: []
-                    }, {
-                        title: "求反关系运算符",
-                        items: []
-                    }, {
-                        title: "字母类符号",
-                        items: []
-                    }, {
-                        title: "箭头",
-                        items: []
-                    }, {
-                        title: "手写体",
-                        items: []
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DELIMITER
-        }, {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "分数<br/>",
-                    icon: {
-                        src: "assets/images/toolbar/btn.png",
-                        x: 45,
-                        y: 0
-                    }
-                },
-                box: {
-                    width: 332,
-                    group: [ {
-                        title: "分数",
-                        items: [ {
-                            title: "分数",
-                            content: [ {
-                                item: {
-                                    val: "\\frac \\placeholder\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "{\\placeholder/\\placeholder}"
-                                }
-                            } ]
-                        }, {
-                            title: "常用分数",
-                            content: [ {
-                                item: {
-                                    val: "\\frac {dy}{dx}"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\frac {\\Delta y}{\\Delta x}"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\frac {\\delta y}{\\delta x}"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\frac \\pi 2"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "上下标<br/>",
-                    icon: {
-                        src: "assets/images/toolbar/btn.png",
-                        x: 82,
-                        y: 0
-                    }
-                },
-                box: {
-                    width: 332,
-                    group: [ {
-                        title: "上标和下标",
-                        items: [ {
-                            title: "上标和下标",
-                            content: [ {
-                                item: {
-                                    val: "\\placeholder^\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\placeholder_\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\placeholder^\\placeholder_\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "{^\\placeholder_\\placeholder\\placeholder}"
-                                }
-                            } ]
-                        }, {
-                            title: "常用的上标和下标",
-                            content: [ {
-                                item: {
-                                    val: "e^{-i\\omega t}"
-                                }
-                            }, {
-                                item: {
-                                    val: "x^2"
-                                }
-                            }, {
-                                item: {
-                                    val: "{}^n_1Y"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "根式<br/>",
-                    icon: {
-                        src: "assets/images/toolbar/btn.png",
-                        x: 119,
-                        y: 0
-                    }
-                },
-                box: {
-                    width: 342,
-                    group: [ {
-                        title: "根式",
-                        items: [ {
-                            title: "根式",
-                            content: [ {
-                                item: {
-                                    val: "\\sqrt \\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\sqrt [\\placeholder] \\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\sqrt [2] \\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\sqrt [3] \\placeholder"
-                                }
-                            } ]
-                        }, {
-                            title: "常用根式",
-                            content: [ {
-                                item: {
-                                    val: "\\frac {-b\\pm\\sqrt{b^2-4ac}}{2a}"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\sqrt {a^2+b^2}"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "积分<br/>",
-                    icon: {
-                        src: "assets/images/toolbar/btn.png",
-                        x: 156,
-                        y: 0
-                    }
-                },
-                box: {
-                    width: 332,
-                    group: [ {
-                        title: "积分",
-                        items: [ {
-                            title: "积分",
-                            content: [ {
-                                item: {
-                                    val: "\\int \\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\int^\\placeholder_\\placeholder\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\iint\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\iint^\\placeholder_\\placeholder\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\iiint\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\iiint^\\placeholder_\\placeholder\\placeholder"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "大型<br/>运算符",
-                    icon: {
-                        src: "assets/images/toolbar/btn.png",
-                        x: 193,
-                        y: 0
-                    }
-                },
-                box: {
-                    width: 332,
-                    group: [ {
-                        title: "求和",
-                        items: [ {
-                            title: "求和",
-                            content: [ {
-                                item: {
-                                    val: "\\sum\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\sum^\\placeholder_\\placeholder\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\sum_\\placeholder\\placeholder"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "括号<br/>",
-                    icon: {
-                        src: "assets/images/toolbar/btn.png",
-                        x: 230,
-                        y: 0
-                    }
-                },
-                box: {
-                    width: 332,
-                    group: [ {
-                        title: "方括号",
-                        items: [ {
-                            title: "方括号",
-                            content: [ {
-                                item: {
-                                    val: "\\left(\\placeholder\\right)"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\left[\\placeholder\\right]"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\left\\{\\placeholder\\right\\}"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\left|\\placeholder\\right|"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        }, {
-            type: UI_ELE_TYPE.DRAPDOWN_BOX,
-            options: {
-                button: {
-                    label: "函数<br/>",
-                    icon: {
-                        src: "assets/images/toolbar/btn.png",
-                        x: 267,
-                        y: 0
-                    }
-                },
-                box: {
-                    width: 340,
-                    group: [ {
-                        title: "函数",
-                        items: [ {
-                            title: "三角函数",
-                            content: [ {
-                                item: {
-                                    val: "\\sin\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\cos\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\tan\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\csc\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\sec\\placeholder"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\cot\\placeholder"
-                                }
-                            } ]
-                        }, {
-                            title: "常用函数",
-                            content: [ {
-                                item: {
-                                    val: "\\sin\\theta"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\cos{2x}"
-                                }
-                            }, {
-                                item: {
-                                    val: "\\tan\\theta=\\frac {\\sin\\theta}{\\cos\\theta}"
-                                }
-                            } ]
-                        } ]
-                    } ]
-                }
-            }
-        } ];
-        //--------------------------------------------- 初始化特殊字符区域以外的配置项
-        (function() {
-            var tmp = [], otherImageSrc = "assets/images/toolbar/other.png", currentConf = [];
-            kity.Utils.each(config, function(conf) {
-                if (conf.type === UI_ELE_TYPE.DELIMITER) {
-                    return;
-                }
-                conf = conf.options.box.group;
-                tmp = tmp.concat(conf);
-            });
-            kity.Utils.each(tmp, function(conf) {
-                conf = conf.items;
-                for (var i = 0, len = conf.length; i < len; i++) {
-                    currentConf = currentConf.concat(conf[i].content);
-                }
-            });
-            // 添加定位信息
-            kity.Utils.each(currentConf, function(conf) {
-                var data = OTHER_POSITION[conf.item.val];
-                if (!data) {
-                    return;
-                }
-                conf.item.img = otherImageSrc;
-                conf.item.pos = data.pos;
-                conf.item.size = data.size;
-            });
-        })();
-        //--------------------------------------------- 初始化特殊字符区域
-        // 基础数学
-        (function() {
-            var list = [ "pm", "infty", "=", "sim", "times", "div", "!", "<", "ll", ">", "gg", "leq", "geq", "mp", "cong", "equiv", "propto", "approx", "forall", "partial", "surd", "cup", "cap", "varnothing", "%", "circ", "exists", "nexists", "in", "ni", "gets", "uparrow", "to", "downarrow", "leftrightarrow", "therefore", "because", "+", "-", "neg", "ast", "cdot", "vdots", /* "ddots",*/ "aleph", "beth", "blacksquare" ], configList = config[2].options.box.group[0].items;
-            configList.push({
-                title: "基础数学",
-                content: getIconContents(list, "assets/images/toolbar/char.png")
-            });
-        })();
-        // 希腊字符配置
-        (function() {
-            var greekList = [ {
-                title: "小写",
-                values: [ "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega" ]
-            }, {
-                title: "大写",
-                values: [ "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta", "Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho", "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega" ]
-            }, {
-                title: "变体",
-                values: [ "digamma", "varepsilon", "varkappa", "varphi", "varpi", "varrho", "varsigma", "vartheta" ]
-            } ], greekConfigList = config[2].options.box.group[1].items;
-            // 小写处理
-            greekConfigList.push({
-                title: greekList[0].title,
-                content: getIconContents(greekList[0].values, "assets/images/toolbar/char.png")
-            });
-            // 大写处理
-            greekConfigList.push({
-                title: greekList[1].title,
-                content: getIconContents(greekList[1].values, "assets/images/toolbar/char.png")
-            });
-            // 变体处理
-            greekConfigList.push({
-                title: greekList[2].title,
-                content: getIconContents(greekList[2].values, "assets/images/toolbar/char.png")
-            });
-        })();
-        // 求反运算符
-        (function() {
-            var greekList = [ {
-                title: "求反关系运算符",
-                values: [ "neq", "nless", "ngtr", "nleq", "ngeq", "nsim", "lneqq", "gneqq", "nprec", "nsucc", "notin", "nsubseteq", "nsupseteq", "subsetneq", "supsetneq", "lnsim", "gnsim", "precnsim", "succnsim", "ntriangleleft", "ntriangleright", "ntrianglelefteq", "ntrianglerighteq", "nmid", "nparallel", "nvdash", "nVdash", "nvDash", "nVDash", "nexists" ]
-            } ], greekConfigList = config[2].options.box.group[2].items;
-            greekConfigList.push({
-                title: greekList[0].title,
-                content: getIconContents(greekList[0].values, "assets/images/toolbar/char.png")
-            });
-        })();
-        // 字母类符号
-        (function() {
-            var list = [ "aleph", "beth", "daleth", "gimel", "complement", "ell", "eth", "hbar", "hslash", "mho", "partial", "wp", "circledS", "Bbbk", "Finv", "Game", "Im", "Re" ], configList = config[2].options.box.group[3].items;
-            configList.push({
-                title: "字母类符号",
-                content: getIconContents(list, "assets/images/toolbar/char.png")
-            });
-        })();
-        // 化箭头
-        (function() {
-            var list = [ "gets", "to", "uparrow", "downarrow", "leftrightarrow", "updownarrow", "Leftarrow", "Rightarrow", "Uparrow", "Downarrow", "Leftrightarrow", "Updownarrow", "longleftarrow", "longrightarrow", "longleftrightarrow", "Longleftarrow", "Longrightarrow", "Longleftrightarrow", "nearrow", "nwarrow", "searrow", "swarrow", "nleftarrow", "nrightarrow", "nLeftarrow", "nRightarrow", "nLeftrightarrow", "leftharpoonup", "leftharpoondown", "rightharpoonup", "rightharpoondown", "upharpoonleft", "upharpoonright", "downharpoonleft", "downharpoonright", "leftrightharpoons", "rightleftharpoons", "leftleftarrows", "rightrightarrows", "upuparrows", "downdownarrows", "leftrightarrows", "rightleftarrows", "looparrowleft", "looparrowright", "leftarrowtail", "rightarrowtail", "Lsh", "Rsh", "Lleftarrow", "Rrightarrow", "curvearrowleft", "curvearrowright", "circlearrowleft", "circlearrowright", "multimap", "leftrightsquigarrow", "twoheadleftarrow", "twoheadrightarrow", "rightsquigarrow" ], configList = config[2].options.box.group[4].items;
-            configList.push({
-                title: "箭头",
-                content: getIconContents(list, "assets/images/toolbar/char.png")
-            });
-        })();
-        // 手写体
-        (function() {
-            var list = [ {
-                title: "手写体",
-                values: [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" ]
-            }, {
-                title: "花体",
-                values: [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" ]
-            }, {
-                title: "双线",
-                values: [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" ]
-            }, {
-                title: "罗马",
-                values: [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" ]
-            } ], configList = config[2].options.box.group[5].items;
-            kity.Utils.each(list[0].values, function(item, index) {
-                list[0].values[index] = "mathcal{" + item + "}";
-            });
-            kity.Utils.each(list[1].values, function(item, index) {
-                list[1].values[index] = "mathfrak{" + item + "}";
-            });
-            kity.Utils.each(list[2].values, function(item, index) {
-                list[2].values[index] = "mathbb{" + item + "}";
-            });
-            kity.Utils.each(list[3].values, function(item, index) {
-                list[3].values[index] = "mathrm{" + item + "}";
-            });
-            // 手写体
-            configList.push({
-                title: list[0].title,
-                content: getIconContents(list[0].values, "assets/images/toolbar/char.png")
-            });
-            configList.push({
-                title: list[1].title,
-                content: getIconContents(list[1].values, "assets/images/toolbar/char.png")
-            });
-            configList.push({
-                title: list[2].title,
-                content: getIconContents(list[2].values, "assets/images/toolbar/char.png")
-            });
-            configList.push({
-                title: list[3].title,
-                content: getIconContents(list[3].values, "assets/images/toolbar/char.png")
-            });
-        })();
-        function getIconContents(keySet, imgSrc) {
-            var result = [];
-            kity.Utils.each(keySet, function(key) {
-                if (key.length > 1) {
-                    key = "\\" + key;
-                }
-                result.push({
-                    key: key,
-                    img: imgSrc,
-                    pos: CHAR_POSITION[key]
-                });
-            });
-            return result;
-        }
-        console.log(JSON.stringify(config, null, 4));
-        return config;
-    }
-};
-
-/*!
- * toolbar元素列表定义
- */
-_p[35] = {
-    value: function(require) {
-        return window.KF_UI_CONFIG;
-    }
-};
-
-/*!
- * 工具条组件
- */
-_p[36] = {
-    value: function(require) {
-        var kity = _p.r(20), UiImpl = _p.r(48), $ = _p.r(47), UI_ELE_TYPE = _p.r(41), Tollbar = kity.createClass("Tollbar", {
-            constructor: function(uiComponent, kfEditor, elementList) {
-                this.kfEditor = kfEditor;
-                this.uiComponent = uiComponent;
-                // 工具栏元素定义列表
-                this.elementList = elementList;
-                this.elements = [];
-                this.initToolbarElements();
-                this.initServices();
-                this.initEvent();
-            },
-            initServices: function() {
-                this.kfEditor.registerService("ui.toolbar.disable", this, {
-                    disableToolbar: this.disableToolbar
-                });
-                this.kfEditor.registerService("ui.toolbar.enable", this, {
-                    enableToolbar: this.enableToolbar
-                });
-                this.kfEditor.registerService("ui.toolbar.close", this, {
-                    closeToolbar: this.closeToolbar
-                });
-            },
-            initEvent: function() {
-                var _self = this;
-                $.on(this.uiComponent.toolbarContainer, "mousedown", function(e) {
-                    e.preventDefault();
-                });
-                $.on(this.uiComponent.toolbarContainer, "mousewheel", function(e) {
-                    e.preventDefault();
-                });
-                // 通知所有组件关闭
-                $.on(this.kfEditor.getContainer(), "mousedown", function() {
-                    _self.notify("closeAll");
-                });
-                // 订阅数据选择主题
-                $.subscribe("data.select", function(data) {
-                    _self.insertSource(data);
-                });
-            },
-            insertSource: function(val) {
-                this.kfEditor.requestService("control.insert.string", val);
-            },
-            disableToolbar: function() {
-                kity.Utils.each(this.elements, function(ele) {
-                    ele.disable && ele.disable();
-                });
-            },
-            enableToolbar: function() {
-                kity.Utils.each(this.elements, function(ele) {
-                    ele.enable && ele.enable();
-                });
-            },
-            getContainer: function() {
-                return this.kfEditor.requestService("ui.get.canvas.container");
-            },
-            closeToolbar: function() {
-                this.closeElement();
-            },
-            // 接受到关闭通知
-            notify: function(type) {
-                switch (type) {
-                  // 关闭所有组件
-                    case "closeAll":
-                  // 关闭其他组件
-                    case "closeOther":
-                    this.closeElement(arguments[1]);
-                    return;
-                }
-            },
-            closeElement: function(exception) {
-                kity.Utils.each(this.elements, function(ele) {
-                    if (ele != exception) {
-                        ele.hide && ele.hide();
-                    }
-                });
-            },
-            initToolbarElements: function() {
-                var elements = this.elements, doc = this.uiComponent.toolbarContainer.ownerDocument, _self = this;
-                kity.Utils.each(this.elementList, function(eleInfo, i) {
-                    var ele = createElement(eleInfo.type, doc, eleInfo.options);
-                    elements.push(ele);
-                    _self.appendElement(ele);
-                });
-            },
-            appendElement: function(uiElement) {
-                uiElement.setToolbar(this);
-                uiElement.attachTo(this.uiComponent.toolbarContainer);
-            }
-        });
-        function createElement(type, doc, options) {
-            switch (type) {
-              case UI_ELE_TYPE.DRAPDOWN_BOX:
-                return createDrapdownBox(doc, options);
-
-              case UI_ELE_TYPE.DELIMITER:
-                return createDelimiter(doc);
-
-              case UI_ELE_TYPE.AREA:
-                return createArea(doc, options);
-            }
-        }
-        function createDrapdownBox(doc, options) {
-            return new UiImpl.DrapdownBox(doc, options);
-        }
-        function createDelimiter(doc) {
-            return new UiImpl.Delimiter(doc);
-        }
-        function createArea(doc, options) {
-            return new UiImpl.Area(doc, options);
-        }
-        return Tollbar;
-    }
-};
-
-/*!
- * 特殊字符区域
- */
-_p[37] = {
-    value: function(require) {
-        var kity = _p.r(20), PREFIX = "kf-editor-ui-", PANEL_HEIGHT = 66, // UiUitls
-        $ = _p.r(47), Box = _p.r(38), Area = kity.createClass("Area", {
-            constructor: function(doc, options) {
-                this.options = options;
-                this.doc = doc;
-                this.toolbar = null;
-                this.disabled = true;
-                this.panelIndex = 0;
-                this.maxPanelIndex = 0;
-                this.currentItemCount = 0;
-                this.lineMaxCount = 9;
-                this.element = this.createArea();
-                this.container = this.createContainer();
-                this.panel = this.createPanel();
-                this.buttonContainer = this.createButtonContainer();
-                this.button = this.createButton();
-                this.mountPoint = this.createMountPoint();
-                this.moveDownButton = this.createMoveDownButton();
-                this.moveUpButton = this.createMoveUpButton();
-                this.boxObject = this.createBox();
-                this.mergeElement();
-                this.mount();
-                this.setListener();
-                this.initEvent();
-            },
-            initEvent: function() {
-                var _self = this;
-                $.on(this.button, "mousedown", function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (e.which !== 1 || _self.disabled) {
-                        return;
-                    }
-                    _self.showMount();
-                    _self.toolbar.notify("closeOther", _self);
-                });
-                $.on(this.moveDownButton, "mousedown", function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (e.which !== 1 || _self.disabled) {
-                        return;
-                    }
-                    _self.nextPanel();
-                    _self.toolbar.notify("closeOther", _self);
-                });
-                $.on(this.moveUpButton, "mousedown", function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (e.which !== 1 || _self.disabled) {
-                        return;
-                    }
-                    _self.prevPanel();
-                    _self.toolbar.notify("closeOther", _self);
-                });
-                $.delegate(this.container, ".kf-editor-ui-area-item", "mousedown", function(e) {
-                    e.preventDefault();
-                    if (e.which !== 1 || _self.disabled) {
-                        return;
-                    }
-                    $.publish("data.select", this.getAttribute("data-value"));
-                });
-                this.boxObject.initEvent();
-            },
-            disable: function() {
-                this.disabled = true;
-                this.boxObject.disable();
-                $.getClassList(this.element).remove(PREFIX + "enabled");
-            },
-            enable: function() {
-                this.disabled = false;
-                this.boxObject.enable();
-                $.getClassList(this.element).add(PREFIX + "enabled");
-            },
-            setListener: function() {
-                var _self = this;
-                this.boxObject.setSelectHandler(function(val) {
-                    // 发布
-                    $.publish("data.select", val);
-                    _self.hide();
-                });
-                // 内容面板切换
-                this.boxObject.setChangeHandler(function(index) {
-                    _self.updateContent();
-                });
-            },
-            createArea: function() {
-                var areaNode = $.ele(this.doc, "div", {
-                    className: PREFIX + "area"
-                });
-                if ("width" in this.options) {
-                    areaNode.style.width = this.options.width + "px";
-                }
-                return areaNode;
-            },
-            checkMaxPanelIndex: function() {
-                this.maxPanelIndex = Math.ceil(this.currentItemCount / this.lineMaxCount / 2);
-            },
-            updateContent: function() {
-                var items = this.boxObject.getOverlapContent(), count = 0, style = null, lineno = 0, colno = 0, lineMaxCount = this.lineMaxCount, newContent = [];
-                // 清空原有内容
-                this.panel.innerHTML = "";
-                kity.Utils.each(items, function(item) {
-                    var contents = item.content;
-                    kity.Utils.each(contents, function(currentContent, index) {
-                        lineno = Math.floor(count / lineMaxCount);
-                        colno = count % lineMaxCount;
-                        count++;
-                        style = "top: " + (lineno * 33 + 5) + "px; left: " + (colno * 32 + 5) + "px;";
-                        newContent.push('<div class="' + PREFIX + 'area-item" data-value="' + currentContent.key + '" style="' + style + '"><div class="' + PREFIX + 'area-item-inner"><div class="' + PREFIX + 'area-item-img" style="background: url(' + currentContent.img + ") no-repeat " + -currentContent.pos.x + "px " + -currentContent.pos.y + 'px;"></div></div></div>');
-                    });
-                });
-                this.currentItemCount = count;
-                this.panelIndex = 0;
-                this.panel.style.top = 0;
-                this.panel.innerHTML = newContent.join("");
-                this.checkMaxPanelIndex();
-                this.updatePanelButtonState();
-            },
-            // 挂载
-            mount: function() {
-                this.boxObject.mountTo(this.mountPoint);
-            },
-            showMount: function() {
-                this.mountPoint.style.display = "block";
-                this.boxObject.updateSize();
-            },
-            hideMount: function() {
-                this.mountPoint.style.display = "none";
-            },
-            hide: function() {
-                this.hideMount();
-                this.boxObject.hide();
-            },
-            createButton: function() {
-                return $.ele(this.doc, "div", {
-                    className: PREFIX + "area-button"
-                });
-            },
-            createMoveDownButton: function() {
-                return $.ele(this.doc, "div", {
-                    className: PREFIX + "movedown-button",
-                    content: ""
-                });
-            },
-            createMoveUpButton: function() {
-                return $.ele(this.doc, "div", {
-                    className: PREFIX + "moveup-button",
-                    content: ""
-                });
-            },
-            createMountPoint: function() {
-                return $.ele(this.doc, "div", {
-                    className: PREFIX + "area-mount"
-                });
-            },
-            createBox: function() {
-                return new Box(this.doc, this.options.box);
-            },
-            createContainer: function() {
-                return $.ele(this.doc, "div", {
-                    className: PREFIX + "area-container"
-                });
-            },
-            createPanel: function() {
-                return $.ele(this.doc, "div", {
-                    className: PREFIX + "area-panel"
-                });
-            },
-            createButtonContainer: function() {
-                return $.ele(this.doc, "div", {
-                    className: PREFIX + "area-button-container"
-                });
-            },
-            mergeElement: function() {
-                this.buttonContainer.appendChild(this.moveUpButton);
-                this.buttonContainer.appendChild(this.moveDownButton);
-                this.buttonContainer.appendChild(this.button);
-                this.container.appendChild(this.panel);
-                this.element.appendChild(this.container);
-                this.element.appendChild(this.buttonContainer);
-                this.element.appendChild(this.mountPoint);
-            },
-            disablePanelUp: function() {
-                this.disabledUp = true;
-                $.getClassList(this.moveUpButton).add("kf-editor-ui-disabled");
-            },
-            enablePanelUp: function() {
-                this.disabledUp = false;
-                $.getClassList(this.moveUpButton).remove("kf-editor-ui-disabled");
-            },
-            disablePanelDown: function() {
-                this.disabledDown = true;
-                $.getClassList(this.moveDownButton).add("kf-editor-ui-disabled");
-            },
-            enablePanelDown: function() {
-                this.disabledDown = false;
-                $.getClassList(this.moveDownButton).remove("kf-editor-ui-disabled");
-            },
-            updatePanelButtonState: function() {
-                if (this.panelIndex === 0) {
-                    this.disablePanelUp();
-                } else {
-                    this.enablePanelUp();
-                }
-                if (this.panelIndex + 1 >= this.maxPanelIndex) {
-                    this.disablePanelDown();
-                } else {
-                    this.enablePanelDown();
-                }
-            },
-            nextPanel: function() {
-                if (this.disabledDown) {
-                    return;
-                }
-                if (this.panelIndex + 1 >= this.maxPanelIndex) {
-                    return;
-                }
-                this.panelIndex++;
-                this.panel.style.top = -this.panelIndex * PANEL_HEIGHT + "px";
-                this.updatePanelButtonState();
-            },
-            prevPanel: function() {
-                if (this.disabledUp) {
-                    return;
-                }
-                if (this.panelIndex === 0) {
-                    return;
-                }
-                this.panelIndex--;
-                this.panel.style.top = -this.panelIndex * PANEL_HEIGHT + "px";
-                this.updatePanelButtonState();
-            },
-            setToolbar: function(toolbar) {
-                this.toolbar = toolbar;
-                this.boxObject.setToolbar(toolbar);
-            },
-            attachTo: function(container) {
-                container.appendChild(this.element);
-                this.updateContent();
-                this.updatePanelButtonState();
-            }
-        });
-        return Area;
-    }
-};
-
-/**
- * Created by hn on 14-3-31.
- */
-_p[38] = {
-    value: function(require) {
-        var kity = _p.r(20), PREFIX = "kf-editor-ui-", // UiUitls
-        $ = _p.r(47), BOX_TYPE = _p.r(40), ITEM_TYPE = _p.r(42), Button = _p.r(39), List = _p.r(45), SCROLL_STEP = 20, Box = kity.createClass("Box", {
-            constructor: function(doc, options) {
-                this.options = options;
-                this.toolbar = null;
-                this.options.type = this.options.type || BOX_TYPE.DETACHED;
-                this.doc = doc;
-                this.itemPanels = null;
-                this.overlapButtonObject = null;
-                this.overlapIndex = -1;
-                this.element = this.createBox();
-                this.groupContainer = this.createGroupContainer();
-                this.itemGroups = this.createItemGroup();
-                this.mergeElement();
-            },
-            createBox: function() {
-                var boxNode = $.ele(this.doc, "div", {
-                    className: PREFIX + "box"
-                });
-                if ("width" in this.options) {
-                    boxNode.style.width = this.options.width + "px";
-                }
-                return boxNode;
-            },
-            setToolbar: function(toolbar) {
-                this.toolbar = toolbar;
-                if (this.overlapButtonObject) {
-                    this.overlapButtonObject.setToolbar(toolbar);
-                }
-            },
-            updateSize: function() {
-                var containerBox = $.getRectBox(this.toolbar.getContainer()), diff = 30, curBox = $.getRectBox(this.element);
-                if (this.options.type === BOX_TYPE.DETACHED) {
-                    if (curBox.bottom <= containerBox.bottom) {
-                        this.element.scrollTop = 0;
-                        return;
-                    }
-                    this.element.style.height = curBox.height - (curBox.bottom - containerBox.bottom + diff) + "px";
-                } else {
-                    var panel = this.getCurrentItemPanel(), panelRect = null;
-                    panel.scrollTop = 0;
-                    if (curBox.bottom <= containerBox.bottom) {
-                        return;
-                    }
-                    panelRect = getRectBox(panel);
-                    panel.style.height = containerBox.bottom - panelRect.top - diff + "px";
-                }
-            },
-            initEvent: function() {
-                var className = "." + PREFIX + "box-item", _self = this;
-                $.delegate(this.groupContainer, className, "mousedown", function(e) {
-                    e.preventDefault();
-                    if (e.which !== 1) {
-                        return;
-                    }
-                    _self.onselectHandler && _self.onselectHandler(this.getAttribute("data-value"));
-                });
-                $.on(this.element, "mousedown", function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                });
-                $.on(this.element, "mousewheel", function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    _self.scroll(e.originalEvent.wheelDelta);
-                });
-            },
-            getNode: function() {
-                return this.element;
-            },
-            setSelectHandler: function(onselectHandler) {
-                this.onselectHandler = onselectHandler;
-            },
-            scroll: function(delta) {
-                // down
-                if (delta < 0) {
-                    this.scrollDown();
-                } else {
-                    this.scrollUp();
-                    this.element.scrollTop -= 20;
-                }
-            },
-            scrollDown: function() {
-                if (this.options.type === BOX_TYPE.DETACHED) {
-                    this.element.scrollTop += SCROLL_STEP;
-                } else {
-                    this.getCurrentItemPanel().scrollTop += SCROLL_STEP;
-                }
-            },
-            scrollUp: function() {
-                if (this.options.type === BOX_TYPE.DETACHED) {
-                    this.element.scrollTop -= SCROLL_STEP;
-                } else {
-                    this.getCurrentItemPanel().scrollTop -= SCROLL_STEP;
-                }
-            },
-            setChangeHandler: function(changeHandler) {
-                this.onchangeHandler = changeHandler;
-            },
-            onchangeHandler: function(index) {},
-            createGroupContainer: function() {
-                return $.ele(this.doc, "div", {
-                    className: PREFIX + "box-container"
-                });
-            },
-            getPositionInfo: function() {
-                return $.getRectBox(this.element);
-            },
-            createItemGroup: function() {
-                var itemGroup = this.createGroup();
-                switch (this.options.type) {
-                  case BOX_TYPE.DETACHED:
-                    return itemGroup.items[0];
-
-                  case BOX_TYPE.OVERLAP:
-                    return this.createOverlapGroup(itemGroup);
-                }
-                return null;
-            },
-            enable: function() {
-                if (this.overlapButtonObject) {
-                    this.overlapButtonObject.enable();
-                }
-            },
-            disable: function() {
-                if (this.overlapButtonObject) {
-                    this.overlapButtonObject.disable();
-                }
-            },
-            hide: function() {
-                this.overlapButtonObject && this.overlapButtonObject.hideMount();
-            },
-            getOverlapContent: function() {
-                // 只有重叠式才可以获取重叠内容
-                if (this.options.type !== BOX_TYPE.OVERLAP) {
-                    return null;
-                }
-                return this.options.group[this.overlapIndex].items;
-            },
-            createOverlapGroup: function(itemGroup) {
-                var classifyList = itemGroup.title, _self = this, overlapContainer = createOverlapContainer(this.doc), overlapButtonObject = createOverlapButton(this.doc, {
-                    fixOffset: this.options.fixOffset
-                }), overlapListObject = createOverlapList(this.doc, {
-                    width: 150,
-                    items: classifyList
-                }), wrapNode = $.ele(this.doc, "div", {
-                    className: PREFIX + "wrap-group"
-                });
-                this.overlapButtonObject = overlapButtonObject;
-                // 组合选择组件
-                overlapButtonObject.mount(overlapListObject);
-                overlapButtonObject.initEvent();
-                overlapListObject.initEvent();
-                // 合并box的内容
-                kity.Utils.each(itemGroup.items, function(itemArr, index) {
-                    var itemWrapNode = wrapNode.cloneNode(false);
-                    kity.Utils.each(itemArr, function(item) {
-                        itemWrapNode.appendChild(item);
-                    });
-                    itemGroup.items[index] = itemWrapNode;
-                });
-                this.itemPanels = itemGroup.items;
-                // 切换面板处理器
-                overlapListObject.setSelectHandler(function(index, oldIndex) {
-                    _self.overlapIndex = index;
-                    overlapButtonObject.setLabel(classifyList[index]);
-                    overlapButtonObject.hideMount();
-                    // 切换内容
-                    itemGroup.items[oldIndex].style.display = "none";
-                    itemGroup.items[index].style.display = "block";
-                    if (index !== oldIndex) {
-                        _self.updateSize();
-                    }
-                    _self.onchangeHandler(index);
-                });
-                overlapContainer.appendChild(overlapButtonObject.getNode());
-                kity.Utils.each(itemGroup.items, function(group, index) {
-                    if (index > 0) {
-                        group.style.display = "none";
-                    }
-                    overlapContainer.appendChild(group);
-                });
-                overlapListObject.select(0);
-                return [ overlapContainer ];
-            },
-            getCurrentItemPanel: function() {
-                return this.itemPanels[this.overlapIndex];
-            },
-            // 获取group的list列表, 该类表满足box的group参数格式
-            getGroupList: function() {
-                var lists = [];
-                kity.Utils.each(this.options.group, function(group, index) {
-                    lists.push(group.title);
-                });
-                return {
-                    width: 150,
-                    items: lists
-                };
-            },
-            createGroup: function() {
-                var doc = this.doc, itemGroup = [], result = {
-                    title: [],
-                    items: []
-                }, groupNode = null, groupTitle = null, itemType = BOX_TYPE.DETACHED === this.options.type ? ITEM_TYPE.BIG : ITEM_TYPE.SMALL, itemContainer = null;
-                groupNode = $.ele(this.doc, "div", {
-                    className: PREFIX + "box-group"
-                });
-                itemContainer = groupNode.cloneNode(false);
-                itemContainer.className = PREFIX + "box-group-item-container";
-                kity.Utils.each(this.options.group, function(group, i) {
-                    result.title.push(group.title || "");
-                    itemGroup = [];
-                    kity.Utils.each(group.items, function(item) {
-                        groupNode = groupNode.cloneNode(false);
-                        itemContainer = itemContainer.cloneNode(false);
-                        groupTitle = $.ele(doc, "div", {
-                            className: PREFIX + "box-group-title",
-                            content: item.title
-                        });
-                        groupNode.appendChild(groupTitle);
-                        groupNode.appendChild(itemContainer);
-                        kity.Utils.each(createItems(doc, item.content, itemType), function(boxItem) {
-                            boxItem.appendTo(itemContainer);
-                        });
-                        itemGroup.push(groupNode);
-                    });
-                    result.items.push(itemGroup);
-                });
-                return result;
-            },
-            mergeElement: function() {
-                var groupContainer = this.groupContainer;
-                this.element.appendChild(groupContainer);
-                kity.Utils.each(this.itemGroups, function(group) {
-                    groupContainer.appendChild(group);
-                });
-            },
-            mountTo: function(container) {
-                container.appendChild(this.element);
-            },
-            appendTo: function(container) {
-                container.appendChild(this.element);
-            }
-        }), BoxItem = kity.createClass("BoxItem", {
-            constructor: function(type, doc, options) {
-                this.type = type;
-                this.doc = doc;
-                this.options = options;
-                this.element = this.createItem();
-                // 项的label是可选的
-                this.labelNode = this.createLabel();
-                this.contentNode = this.createContent();
-                this.mergeElement();
-            },
-            getNode: function() {
-                return this.element;
-            },
-            createItem: function() {
-                var itemNode = $.ele(this.doc, "div", {
-                    className: PREFIX + "box-item"
-                });
-                return itemNode;
-            },
-            createLabel: function() {
-                var labelNode = null;
-                if (!("label" in this.options)) {
-                    return;
-                }
-                labelNode = $.ele(this.doc, "div", {
-                    className: PREFIX + "box-item-label",
-                    content: this.options.label
-                });
-                return labelNode;
-            },
-            getContent: function() {},
-            createContent: function() {
-                switch (this.type) {
-                  case ITEM_TYPE.BIG:
-                    return this.createBigContent();
-
-                  case ITEM_TYPE.SMALL:
-                    return this.createSmallContent();
-                }
-            },
-            createBigContent: function() {
-                var doc = this.doc, contentNode = $.ele(doc, "div", {
-                    className: PREFIX + "box-item-content"
-                }), cls = PREFIX + "box-item-val", tmpContent = this.options.item, tmpNode = null, styleStr = getStyleByData(tmpContent);
-                tmpNode = $.ele(doc, "div", {
-                    className: cls
-                });
-                tmpNode.innerHTML = '<div class="' + PREFIX + 'item-image" style="' + styleStr + '"></div>';
-                // 附加属性到项的根节点上
-                this.element.setAttribute("data-value", tmpContent.val);
-                contentNode.appendChild(tmpNode);
-                return contentNode;
-            },
-            createSmallContent: function() {
-                var doc = this.doc, contentNode = $.ele(doc, "div", {
-                    className: PREFIX + "box-item-content"
-                }), cls = PREFIX + "box-item-val", tmpContent = this.options, tmpNode = null;
-                tmpNode = $.ele(doc, "div", {
-                    className: cls
-                });
-                tmpNode.style.background = "url( " + tmpContent.img + " )";
-                tmpNode.style.backgroundPosition = -tmpContent.pos.x + "px " + -tmpContent.pos.y + "px";
-                // 附加属性到项的根节点上
-                this.element.setAttribute("data-value", tmpContent.key);
-                contentNode.appendChild(tmpNode);
-                return contentNode;
-            },
-            mergeElement: function() {
-                if (this.labelNode) {
-                    this.element.appendChild(this.labelNode);
-                }
-                this.element.appendChild(this.contentNode);
-            },
-            appendTo: function(container) {
-                container.appendChild(this.element);
-            }
-        });
-        function createItems(doc, group, type) {
-            var items = [];
-            kity.Utils.each(group, function(itemVal, i) {
-                items.push(new BoxItem(type, doc, itemVal));
-            });
-            return items;
-        }
-        // 为重叠式box创建容器
-        function createOverlapContainer(doc) {
-            return $.ele(doc, "div", {
-                className: PREFIX + "overlap-container"
-            });
-        }
-        function createOverlapButton(doc, options) {
-            return new Button(doc, {
-                className: "overlap-button",
-                label: "",
-                fixOffset: options.fixOffset
-            });
-        }
-        function createOverlapList(doc, list) {
-            return new List(doc, list);
-        }
-        function getRectBox(node) {
-            return node.getBoundingClientRect();
-        }
-        function getStyleByData(data) {
-            // background
-            var style = "background: url( " + data.img + " ) no-repeat ";
-            style += -data.pos.x + "px ";
-            style += -data.pos.y + "px;";
-            // width height
-            style += " width: " + data.size.width + "px;";
-            style += " height: " + data.size.height + "px;";
-            return style;
-        }
-        return Box;
-    }
-};
-
-/**
- * Created by hn on 14-3-31.
- */
-_p[39] = {
-    value: function(require) {
-        var kity = _p.r(20), PREFIX = "kf-editor-ui-", LIST_OFFSET = 7, DEFAULT_OPTIONS = {
-            iconSize: {
-                w: 32,
-                h: 32
-            }
-        }, // UiUitls
-        $ = _p.r(47), Button = kity.createClass("Button", {
-            constructor: function(doc, options) {
-                this.options = kity.Utils.extend({}, DEFAULT_OPTIONS, options);
-                // 事件状态， 是否已经初始化
-                this.eventState = false;
-                this.toolbar = null;
-                this.displayState = false;
-                this.fixOffset = options.fixOffset || false;
-                this.doc = doc;
-                this.element = this.createButton();
-                this.disabled = true;
-                // 挂载的对象
-                this.mountElement = null;
-                this.icon = this.createIcon();
-                this.label = this.createLabel();
-                this.sign = this.createSign();
-                this.mountPoint = this.createMountPoint();
-                this.mergeElement();
-            },
-            initEvent: function() {
-                var _self = this;
-                if (this.eventState) {
-                    return;
-                }
-                this.eventState = true;
-                $.on(this.element, "mousedown", function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (e.which !== 1) {
-                        return;
-                    }
-                    if (_self.disabled) {
-                        return;
-                    }
-                    _self.toggleSelect();
-                    _self.toggleMountElement();
-                });
-            },
-            setToolbar: function(toolbar) {
-                this.toolbar = toolbar;
-            },
-            toggleMountElement: function() {
-                if (this.displayState) {
-                    this.hideMount();
-                } else {
-                    this.showMount();
-                }
-            },
-            setLabel: function(labelText) {
-                var signText = "";
-                if (this.sign) {
-                    signText = '<div class="' + PREFIX + 'button-sign"></div>';
-                }
-                this.label.innerHTML = labelText + signText;
-            },
-            toggleSelect: function() {
-                $.getClassList(this.element).toggle(PREFIX + "button-in");
-            },
-            unselect: function() {
-                $.getClassList(this.element).remove(PREFIX + "button-in");
-            },
-            select: function() {
-                $.getClassList(this.element).add(PREFIX + "button-in");
-            },
-            show: function() {
-                this.select();
-                this.showMount();
-            },
-            hide: function() {
-                this.unselect();
-                this.hideMount();
-            },
-            showMount: function() {
-                this.displayState = true;
-                this.mountPoint.style.display = "block";
-                if (this.fixOffset) {
-                    var elementRect = this.element.getBoundingClientRect();
-                    this.mountElement.setOffset(elementRect.left + LIST_OFFSET, elementRect.bottom);
-                }
-                var editorContainer = this.toolbar.getContainer(), currentBox = null, containerBox = $.getRectBox(editorContainer), mountEleBox = this.mountElement.getPositionInfo();
-                // 修正偏移
-                if (mountEleBox.right > containerBox.right) {
-                    currentBox = $.getRectBox(this.element);
-                    // 对齐到按钮的右边界
-                    this.mountPoint.style.left = currentBox.right - mountEleBox.right - 1 + "px";
-                }
-                this.mountElement.updateSize && this.mountElement.updateSize();
-            },
-            hideMount: function() {
-                this.displayState = false;
-                this.mountPoint.style.display = "none";
-            },
-            getNode: function() {
-                return this.element;
-            },
-            mount: function(element) {
-                this.mountElement = element;
-                element.mountTo(this.mountPoint);
-            },
-            createButton: function() {
-                var buttonNode = $.ele(this.doc, "div", {
-                    className: PREFIX + "button"
-                });
-                // 附加className
-                if (this.options.className) {
-                    buttonNode.className += " " + PREFIX + this.options.className;
-                }
-                return buttonNode;
-            },
-            createIcon: function() {
-                if (!this.options.icon) {
-                    return null;
-                }
-                var iconNode = $.ele(this.doc, "div", {
-                    className: PREFIX + "button-icon"
-                });
-                if (typeof this.options.icon === "string") {
-                    iconNode.style.backgroundImage = "url(" + this.options.icon + ") no-repeat";
-                } else {
-                    iconNode.style.background = getBackgroundStyle(this.options.icon);
-                }
-                if (this.options.iconSize.w) {
-                    iconNode.style.width = this.options.iconSize.w + "px";
-                }
-                if (this.options.iconSize.h) {
-                    iconNode.style.height = this.options.iconSize.h + "px";
-                }
-                return iconNode;
-            },
-            createLabel: function() {
-                var labelNode = $.ele(this.doc, "div", {
-                    className: PREFIX + "button-label",
-                    content: this.options.label
-                });
-                return labelNode;
-            },
-            createSign: function() {
-                if (this.options.sign === false) {
-                    return null;
-                }
-                return $.ele(this.doc, "div", {
-                    className: PREFIX + "button-sign"
-                });
-            },
-            createMountPoint: function() {
-                return $.ele(this.doc, "div", {
-                    className: PREFIX + "button-mount-point"
-                });
-            },
-            disable: function() {
-                this.disabled = true;
-                $.getClassList(this.element).remove(PREFIX + "enabled");
-            },
-            enable: function() {
-                this.disabled = false;
-                $.getClassList(this.element).add(PREFIX + "enabled");
-            },
-            mergeElement: function() {
-                this.icon && this.element.appendChild(this.icon);
-                this.element.appendChild(this.label);
-                this.sign && this.label.appendChild(this.sign);
-                this.element.appendChild(this.mountPoint);
-            }
-        });
-        function getBackgroundStyle(data) {
-            var style = "url( " + data.src + " ) no-repeat ";
-            style += -data.x + "px ";
-            style += -data.y + "px";
-            return style;
-        }
-        return Button;
-    }
-};
-
-/*!
- * box类型定义
- */
-_p[40] = {
-    value: function(require) {
-        return {
-            // 分离式
-            DETACHED: 1,
-            // 重叠式
-            OVERLAP: 2
-        };
-    }
-};
-
-/*!
- * toolbar元素类型定义
- */
-_p[41] = {
-    value: function(require) {
-        return {
-            DRAPDOWN_BOX: 1,
-            AREA: 2,
-            DELIMITER: 3
-        };
-    }
-};
-
-/*!
- * 组元素类型定义
- */
-_p[42] = {
-    value: function(require) {
-        return {
-            BIG: 1,
-            SMALL: 2
-        };
-    }
-};
-
-/*!
- * 分割符
- */
-_p[43] = {
-    value: function(require) {
-        var kity = _p.r(20), PREFIX = "kf-editor-ui-", // UiUitls
-        $ = _p.r(47), Delimiter = kity.createClass("Delimiter", {
-            constructor: function(doc) {
-                this.doc = doc;
-                this.element = this.createDilimiter();
-            },
-            setToolbar: function(toolbar) {},
-            createDilimiter: function() {
-                var dilimiterNode = $.ele(this.doc, "div", {
-                    className: PREFIX + "delimiter"
-                });
-                dilimiterNode.appendChild($.ele(this.doc, "div", {
-                    className: PREFIX + "delimiter-line"
-                }));
-                return dilimiterNode;
-            },
-            attachTo: function(container) {
-                container.appendChild(this.element);
-            }
-        });
-        return Delimiter;
-    }
-};
-
-/**
- * Created by hn on 14-3-31.
- */
-_p[44] = {
-    value: function(require) {
-        var kity = _p.r(20), // UiUitls
-        $ = _p.r(47), Button = _p.r(39), Box = _p.r(38), DrapdownBox = kity.createClass("DrapdownBox", {
-            constructor: function(doc, options) {
-                this.options = options;
-                this.toolbar = null;
-                this.doc = doc;
-                this.buttonElement = this.createButton();
-                this.element = this.buttonElement.getNode();
-                this.boxElement = this.createBox();
-                this.buttonElement.mount(this.boxElement);
-                this.initEvent();
-            },
-            initEvent: function() {
-                var _self = this;
-                // 通知工具栏互斥
-                $.on(this.element, "mousedown", function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    _self.toolbar.notify("closeOther", _self);
-                });
-                this.buttonElement.initEvent();
-                this.boxElement.initEvent();
-                this.boxElement.setSelectHandler(function(val) {
-                    // 发布
-                    $.publish("data.select", val);
-                    _self.buttonElement.hide();
-                });
-            },
-            disable: function() {
-                this.buttonElement.disable();
-            },
-            enable: function() {
-                this.buttonElement.enable();
-            },
-            setToolbar: function(toolbar) {
-                this.toolbar = toolbar;
-                this.buttonElement.setToolbar(toolbar);
-                this.boxElement.setToolbar(toolbar);
-            },
-            createButton: function() {
-                return new Button(this.doc, this.options.button);
-            },
-            show: function() {
-                this.buttonElement.show();
-            },
-            hide: function() {
-                this.buttonElement.hide();
-            },
-            createBox: function() {
-                return new Box(this.doc, this.options.box);
-            },
-            attachTo: function(container) {
-                container.appendChild(this.element);
-            }
-        });
-        return DrapdownBox;
-    }
-};
-
-/**
- * Created by hn on 14-3-31.
- */
-_p[45] = {
-    value: function(require) {
-        var kity = _p.r(20), PREFIX = "kf-editor-ui-", // UiUitls
-        $ = _p.r(47), List = kity.createClass("List", {
-            constructor: function(doc, options) {
-                this.options = options;
-                this.doc = doc;
-                this.onselectHandler = null;
-                this.currentSelect = -1;
-                this.element = this.createBox();
-                this.itemGroups = this.createItems();
-                this.mergeElement();
-            },
-            // 预定义的方法留空
-            onselectHandler: function(index, oldIndex) {},
-            setSelectHandler: function(selectHandler) {
-                this.onselectHandler = selectHandler;
-            },
-            createBox: function() {
-                var boxNode = $.ele(this.doc, "div", {
-                    className: PREFIX + "list"
-                }), // 创建背景
-                bgNode = $.ele(this.doc, "div", {
-                    className: PREFIX + "list-bg"
-                });
-                if ("width" in this.options) {
-                    boxNode.style.width = this.options.width + "px";
-                }
-                boxNode.appendChild(bgNode);
-                return boxNode;
-            },
-            select: function(index) {
-                var oldSelect = this.currentSelect;
-                if (oldSelect === -1) {
-                    oldSelect = index;
-                }
-                this.unselect(oldSelect);
-                this.currentSelect = index;
-                $.getClassList(this.itemGroups.items[index]).add(PREFIX + "list-item-select");
-                this.onselectHandler(index, oldSelect);
-            },
-            unselect: function(index) {
-                $.getClassList(this.itemGroups.items[index]).remove(PREFIX + "list-item-select");
-            },
-            setOffset: function(x, y) {
-                this.element.style.left = x + "px";
-                this.element.style.top = y + "px";
-            },
-            initEvent: function() {
-                var className = "." + PREFIX + "list-item", _self = this;
-                $.delegate(this.itemGroups.container, className, "mousedown", function(e) {
-                    e.preventDefault();
-                    if (e.which !== 1) {
-                        return;
-                    }
-                    _self.select(this.getAttribute("data-index"));
-                });
-                $.on(this.element, "mousedown", function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                });
-            },
-            getPositionInfo: function() {
-                return $.getRectBox(this.element);
-            },
-            createItems: function() {
-                var doc = this.doc, groupNode = null, itemNode = null, iconNode = null, items = [], itemContainer = null;
-                groupNode = $.ele(this.doc, "div", {
-                    className: PREFIX + "list-item"
-                });
-                itemContainer = groupNode.cloneNode(false);
-                itemContainer.className = PREFIX + "list-item-container";
-                kity.Utils.each(this.options.items, function(itemText, i) {
-                    itemNode = groupNode.cloneNode(false);
-                    iconNode = groupNode.cloneNode(false);
-                    iconNode.className = PREFIX + "list-item-icon";
-                    itemNode.appendChild(iconNode);
-                    itemNode.appendChild($.ele(doc, "text", itemText));
-                    itemNode.setAttribute("data-index", i);
-                    items.push(itemNode);
-                    itemContainer.appendChild(itemNode);
-                });
-                return {
-                    container: itemContainer,
-                    items: items
-                };
-            },
-            mergeElement: function() {
-                this.element.appendChild(this.itemGroups.container);
-            },
-            mountTo: function(container) {
-                container.appendChild(this.element);
-            }
-        });
-        return List;
-    }
-};
-
-/*!
- * 滚动条组件
- */
-_p[46] = {
-    value: function(require) {
-        var kity = _p.r(20), SCROLLBAR_DEF = _p.r(32).scrollbar, SCROLLBAR_CONF = _p.r(29).scrollbar, Utils = _p.r(4), CLASS_PREFIX = "kf-editor-ui-";
-        return kity.createClass("Scrollbar", {
-            constructor: function(uiComponent, kfEditor) {
-                this.uiComponent = uiComponent;
-                this.kfEditor = kfEditor;
-                this.widgets = null;
-                this.container = this.uiComponent.scrollbarContainer;
-                // 显示状态
-                this.state = false;
-                // 滚动条当前各个状态下的值
-                this.values = {
-                    // 滚动条此时实际的偏移值, 计算的时候假定滑块的宽度为0
-                    offset: 0,
-                    // 滑块此时偏移位置所占轨道的比例, 计算的时候假定滑块的宽度为0
-                    left: 0,
-                    // 滚动条控制的容器的可见宽度
-                    viewWidth: 0,
-                    // 滚动条对应的内容实际宽度
-                    contentWidth: 0,
-                    // 轨道长度
-                    trackWidth: 0,
-                    // 滑块宽度
-                    thumbWidth: 0,
-                    // 可滚动的宽度
-                    scrollWidth: 0
-                };
-                // 滑块的物理偏移， 不同于values.offset
-                this.thumbLocationX = 0;
-                // 左溢出长度
-                this.leftOverflow = 0;
-                // 右溢出长度
-                this.rightOverflow = 0;
-                // 记录本次和上一次改变内容之间宽度是否变大
-                this.isExpand = true;
-                this.initWidget();
-                this.mountWidget();
-                this.initSize();
-                this.hide();
-                this.initServices();
-                this.initEvent();
-                this.updateHandler = function() {};
-            },
-            initWidget: function() {
-                var doc = this.container.ownerDocument;
-                this.widgets = {
-                    leftButton: createElement(doc, "div", "left-button"),
-                    rightButton: createElement(doc, "div", "right-button"),
-                    track: createElement(doc, "div", "track"),
-                    thumb: createElement(doc, "div", "thumb"),
-                    thumbBody: createElement(doc, "div", "thumb-body")
-                };
-            },
-            initSize: function() {
-                var leftBtnWidth = getRect(this.widgets.leftButton).width, rightBtnWidth = getRect(this.widgets.rightButton).width;
-                this.values.viewWidth = getRect(this.container).width;
-                this.values.trackWidth = this.values.viewWidth - leftBtnWidth - rightBtnWidth;
-                this.widgets.track.style.width = this.values.trackWidth + "px";
-            },
-            initServices: function() {
-                this.kfEditor.registerService("ui.show.scrollbar", this, {
-                    showScrollbar: this.show
-                });
-                this.kfEditor.registerService("ui.hide.scrollbar", this, {
-                    hideScrollbar: this.hide
-                });
-                this.kfEditor.registerService("ui.update.scrollbar", this, {
-                    updateScrollbar: this.update
-                });
-                this.kfEditor.registerService("ui.set.scrollbar.update.handler", this, {
-                    setUpdateHandler: this.setUpdateHandler
-                });
-                this.kfEditor.registerService("ui.relocation.scrollbar", this, {
-                    relocation: this.relocation
-                });
-            },
-            initEvent: function() {
-                preventDefault(this);
-                trackClick(this);
-                thumbHandler(this);
-                btnClick(this);
-            },
-            mountWidget: function() {
-                var widgets = this.widgets, container = this.container;
-                for (var wgtName in widgets) {
-                    if (widgets.hasOwnProperty(wgtName)) {
-                        container.appendChild(widgets[wgtName]);
-                    }
-                }
-                widgets.thumb.appendChild(widgets.thumbBody);
-                widgets.track.appendChild(widgets.thumb);
-            },
-            show: function() {
-                this.state = true;
-                this.container.style.display = "block";
-            },
-            hide: function() {
-                this.state = false;
-                this.container.style.display = "none";
-            },
-            update: function(contentWidth) {
-                var trackWidth = this.values.trackWidth, thumbWidth = 0;
-                this.isExpand = contentWidth > this.values.contentWidth;
-                this.values.contentWidth = contentWidth;
-                this.values.scrollWidth = contentWidth - this.values.viewWidth;
-                if (trackWidth >= contentWidth) {
-                    this.hide();
-                    return;
-                }
-                thumbWidth = Math.max(Math.ceil(trackWidth * trackWidth / contentWidth), SCROLLBAR_DEF.thumbMinSize);
-                this.values.thumbWidth = thumbWidth;
-                this.widgets.thumb.style.width = thumbWidth + "px";
-                this.widgets.thumbBody.style.width = thumbWidth - 10 + "px";
-            },
-            setUpdateHandler: function(updateHandler) {
-                this.updateHandler = updateHandler;
-            },
-            updateOffset: function(offset) {
-                var values = this.values;
-                values.offset = offset;
-                values.left = offset / values.trackWidth;
-                this.leftOverflow = values.left * (values.contentWidth - values.viewWidth);
-                this.rightOverflow = values.contentWidth - values.viewWidth - this.leftOverflow;
-                this.updateHandler(values.left, values.offset, values);
-            },
-            relocation: function() {
-                var cursorLocation = this.kfEditor.requestService("control.get.cursor.location"), padding = SCROLLBAR_CONF.padding, contentWidth = this.values.contentWidth, viewWidth = this.values.viewWidth, // 视图左溢出长度
-                viewLeftOverflow = this.values.left * (contentWidth - viewWidth), diff = 0;
-                if (cursorLocation.x < viewLeftOverflow) {
-                    if (cursorLocation.x < 0) {
-                        cursorLocation.x = 0;
-                    }
-                    setThumbOffsetByViewOffset(this, cursorLocation.x);
-                } else if (cursorLocation.x + padding > viewLeftOverflow + viewWidth) {
-                    cursorLocation.x += padding;
-                    if (cursorLocation.x > contentWidth) {
-                        cursorLocation.x = contentWidth;
-                    }
-                    diff = cursorLocation.x - viewWidth;
-                    setThumbOffsetByViewOffset(this, diff);
-                } else {
-                    if (this.isExpand) {
-                        // 根据上一次左溢出值设置滑块位置
-                        setThumbByLeftOverflow(this, this.leftOverflow);
-                    } else {
-                        // 减少左溢出
-                        setThumbByLeftOverflow(this, contentWidth - viewWidth - this.rightOverflow);
-                    }
-                }
-            }
-        });
-        function createElement(doc, eleName, className) {
-            var node = doc.createElement(eleName), str = '<div class="$1"></div><div class="$2"></div>';
-            node.className = CLASS_PREFIX + className;
-            if (className === "thumb") {
-                className = CLASS_PREFIX + className;
-                node.innerHTML = str.replace("$1", className + "-left").replace("$2", className + "-right");
-            }
-            return node;
-        }
-        function getRect(node) {
-            return node.getBoundingClientRect();
-        }
-        // 阻止浏览器在scrollbar上的默认行为
-        function preventDefault(container) {
-            Utils.addEvent(container, "mousedown", function(e) {
-                e.preventDefault();
-            });
-        }
-        function preventDefault(comp) {
-            Utils.addEvent(comp.container, "mousedown", function(e) {
-                e.preventDefault();
-            });
-        }
-        // 轨道点击
-        function trackClick(comp) {
-            Utils.addEvent(comp.widgets.track, "mousedown", function(e) {
-                trackClickHandler(this, comp, e);
-            });
-        }
-        // 两端按钮点击
-        function btnClick(comp) {
-            // left
-            Utils.addEvent(comp.widgets.leftButton, "mousedown", function() {
-                setThumbOffsetByStep(comp, -SCROLLBAR_CONF.step);
-            });
-            Utils.addEvent(comp.widgets.rightButton, "mousedown", function() {
-                setThumbOffsetByStep(comp, SCROLLBAR_CONF.step);
-            });
-        }
-        // 滑块处理
-        function thumbHandler(comp) {
-            var isMoving = false, startPoint = 0, startOffset = 0, trackWidth = comp.values.trackWidth;
-            Utils.addEvent(comp.widgets.thumb, "mousedown", function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                isMoving = true;
-                startPoint = e.clientX;
-                startOffset = comp.thumbLocationX;
-            });
-            Utils.addEvent(comp.container.ownerDocument, "mouseup", function() {
-                isMoving = false;
-                startPoint = 0;
-                startOffset = 0;
-            });
-            Utils.addEvent(comp.container.ownerDocument, "mousemove", function(e) {
-                if (!isMoving) {
-                    return;
-                }
-                var distance = e.clientX - startPoint, offset = startOffset + distance, thumbWidth = comp.values.thumbWidth;
-                if (offset < 0) {
-                    offset = 0;
-                } else if (offset + thumbWidth > trackWidth) {
-                    offset = trackWidth - thumbWidth;
-                }
-                setThumbLocation(comp, offset);
-            });
-        }
-        // 轨道点击处理器
-        function trackClickHandler(track, comp, evt) {
-            var trackRect = getRect(track), values = comp.values, // 单位偏移值， 一个viewWidth所对应到轨道上后的offset值
-            unitOffset = values.viewWidth / (values.contentWidth - values.viewWidth) * values.trackWidth, // 点击位置在轨道中的偏移
-            clickOffset = evt.clientX - trackRect.left;
-            // right click
-            if (clickOffset > values.offset) {
-                // 剩余距离已经不足以支撑滚动， 则直接偏移置最大
-                if (values.offset + unitOffset > values.trackWidth) {
-                    setThumbOffset(comp, values.trackWidth);
-                } else {
-                    setThumbOffset(comp, values.offset + unitOffset);
-                }
-            } else {
-                // 剩余距离已经不足以支撑滚动， 则直接把偏移置零
-                if (values.offset - unitOffset < 0) {
-                    setThumbOffset(comp, 0);
-                } else {
-                    setThumbOffset(comp, values.offset - unitOffset);
-                }
-            }
-        }
-        function setThumbLocation(comp, locationX) {
-            // 滑块偏移值
-            var values = comp.values, trackPieceWidth = values.trackWidth - values.thumbWidth, offset = Math.floor(locationX / trackPieceWidth * values.trackWidth);
-            comp.updateOffset(offset);
-            // 更新滑块物理偏移: 定位
-            comp.thumbLocationX = locationX;
-            comp.widgets.thumb.style.left = locationX + "px";
-        }
-        // 根据指定的内容视图上移动的步长来改变滚动条的offset值
-        function setThumbOffsetByStep(comp, step) {
-            var leftOverflow = comp.leftOverflow + step;
-            // 修正越界
-            if (leftOverflow < 0) {
-                leftOverflow = 0;
-            } else if (leftOverflow > comp.values.scrollWidth) {
-                leftOverflow = comp.values.scrollWidth;
-            }
-            setThumbByLeftOverflow(comp, leftOverflow);
-        }
-        // 设置偏移值, 会同时更新滑块在显示上的定位
-        function setThumbOffset(comp, offset) {
-            var values = comp.values, offsetProportion = offset / values.trackWidth, trackPieceWidth = values.trackWidth - values.thumbWidth, thumbLocationX = 0;
-            thumbLocationX = Math.floor(offsetProportion * trackPieceWidth);
-            if (offset < 0) {
-                offset = 0;
-                thumbLocationX = 0;
-            }
-            comp.updateOffset(offset);
-            // 更新滑块定位
-            comp.widgets.thumb.style.left = thumbLocationX + "px";
-            comp.thumbLocationX = thumbLocationX;
-        }
-        /**
-     * 根据内容视图上的偏移值设置滑块位置
-     */
-        function setThumbOffsetByViewOffset(comp, viewOffset) {
-            var values = comp.values, offsetProportion = 0, offset = 0;
-            // 轨道偏移比例
-            offsetProportion = viewOffset / (values.contentWidth - values.viewWidth);
-            // 轨道偏移值
-            offset = Math.floor(offsetProportion * values.trackWidth);
-            setThumbOffset(comp, offset);
-        }
-        /**
-     * 根据左溢出值设置滑块定位
-     */
-        function setThumbByLeftOverflow(comp, leftViewOverflow) {
-            var values = comp.values, overflowProportion = leftViewOverflow / (values.contentWidth - values.viewWidth);
-            setThumbOffset(comp, overflowProportion * values.trackWidth);
-        }
-    }
-};
-
-/**
- * Created by hn on 14-4-1.
- */
-_p[47] = {
-    value: function(require) {
-        var $ = _p.r(14), kity = _p.r(20), TOPIC_POOL = {};
-        var Utils = {
-            ele: function(doc, name, options) {
-                var node = null;
-                if (name === "text") {
-                    return doc.createTextNode(options);
-                }
-                node = doc.createElement(name);
-                options.className && (node.className = options.className);
-                if (options.content) {
-                    node.innerHTML = options.content;
-                }
-                return node;
-            },
-            getRectBox: function(node) {
-                return node.getBoundingClientRect();
-            },
-            on: function(target, type, fn) {
-                $(target).on(type, fn);
-                return this;
-            },
-            delegate: function(target, selector, type, fn) {
-                $(target).delegate(selector, type, fn);
-                return this;
-            },
-            publish: function(topic, args) {
-                var callbackList = TOPIC_POOL[topic];
-                if (!callbackList) {
-                    return;
-                }
-                args = [].slice.call(arguments, 1);
-                kity.Utils.each(callbackList, function(callback) {
-                    callback.apply(null, args);
-                });
-            },
-            subscribe: function(topic, callback) {
-                if (!TOPIC_POOL[topic]) {
-                    TOPIC_POOL[topic] = [];
-                }
-                TOPIC_POOL[topic].push(callback);
-            },
-            getClassList: function(node) {
-                return node.classList || new ClassList(node);
-            }
-        };
-        //注意： 仅保证兼容IE9以上
-        function ClassList(node) {
-            this.node = node;
-            this.classes = node.className.replace(/^\s+|\s+$/g, "").split(/\s+/);
-        }
-        ClassList.prototype = {
-            constructor: ClassList,
-            contains: function(className) {
-                return this.classes.indexOf(className) !== -1;
-            },
-            add: function(className) {
-                if (this.classes.indexOf(className) == -1) {
-                    this.classes.push(className);
-                }
-                this._update();
-                return this;
-            },
-            remove: function(className) {
-                var index = this.classes.indexOf(className);
-                if (index !== -1) {
-                    this.classes.splice(index, 1);
-                    this._update();
-                }
-                return this;
-            },
-            toggle: function(className) {
-                var method = this.contains(className) ? "remove" : "add";
-                return this[method](className);
-            },
-            _update: function() {
-                this.node.className = this.classes.join(" ");
-            }
-        };
-        return Utils;
-    }
-};
-
-/**
- * Created by hn on 14-3-31.
- */
-_p[48] = {
-    value: function(require) {
-        return {
-            DrapdownBox: _p.r(44),
-            Delimiter: _p.r(43),
-            Area: _p.r(37)
-        };
-    }
-};
-
-/**
- * Created by hn on 14-3-17.
- */
-_p[49] = {
-    value: function(require) {
-        var kity = _p.r(20), // UiUitls
-        $ = _p.r(47), enableTatex = _p.r(29).enableLatex, Utils = _p.r(4), VIEW_STATE = _p.r(32).VIEW_STATE, Scrollbar = _p.r(46), Toolbar = _p.r(36), // 控制组件
-        ScrollZoom = _p.r(31), ELEMENT_LIST = _p.r(35), UIComponent = kity.createClass("UIComponent", {
-            constructor: function(kfEditor, options) {
-                var currentDocument = null;
-                this.options = options;
-                this.container = kfEditor.getContainer();
-                currentDocument = this.container.ownerDocument;
-                // ui组件实例集合
-                this.components = {};
-                this.canvasRect = null;
-                this.viewState = VIEW_STATE.NO_OVERFLOW;
-                this.latexInput = null;
-                this.kfEditor = kfEditor;
-                this.toolbarWrap = createToolbarWrap(currentDocument);
-                this.toolbarContainer = createToolbarContainer(currentDocument);
-                this.editArea = createEditArea(currentDocument);
-                this.canvasContainer = createCanvasContainer(currentDocument);
-                this.scrollbarContainer = createScrollbarContainer(currentDocument);
-                this.toolbarWrap.appendChild(this.toolbarContainer);
-                this.container.appendChild(this.toolbarWrap);
-                if (enableTatex) {
-                    this.latexArea = creatLatexArea(currentDocument);
-                    this.latexInput = this.latexArea.firstChild;
-                    this.editArea.appendChild(this.latexArea);
-                }
-                this.editArea.appendChild(this.canvasContainer);
-                this.container.appendChild(this.editArea);
-                this.container.appendChild(this.scrollbarContainer);
-                this.initComponents();
-                this.initServices();
-                this.initEvent();
-                this.updateContainerSize(this.container, this.toolbarWrap, this.editArea, this.canvasContainer);
-                this.initScrollEvent();
-            },
-            // 组件实例化
-            initComponents: function() {
-                // 工具栏组件
-                this.components.toolbar = new Toolbar(this, this.kfEditor, ELEMENT_LIST);
-                // TODO 禁用缩放, 留待后面再重新开启
-                if (false) {
-                    //                if ( this.options.zoom ) {
-                    this.components.scrollZoom = new ScrollZoom(this, this.kfEditor, this.canvasContainer, {
-                        max: this.options.maxzoom,
-                        min: this.options.minzoom
-                    });
-                }
-                this.components.scrollbar = new Scrollbar(this, this.kfEditor);
-            },
-            updateContainerSize: function(container, toolbar, editArea) {
-                var containerBox = container.getBoundingClientRect(), toolbarBox = toolbar.getBoundingClientRect();
-                editArea.style.width = containerBox.width + "px";
-                editArea.style.height = containerBox.bottom - toolbarBox.bottom + "px";
-            },
-            // 初始化服务
-            initServices: function() {
-                this.kfEditor.registerService("ui.get.canvas.container", this, {
-                    getCanvasContainer: this.getCanvasContainer
-                });
-                this.kfEditor.registerService("ui.get.latex.input", this, {
-                    getLatexInput: this.getLatexInput
-                });
-                this.kfEditor.registerService("ui.update.canvas.view", this, {
-                    updateCanvasView: this.updateCanvasView
-                });
-                this.kfEditor.registerService("ui.canvas.container.event", this, {
-                    on: this.addEvent,
-                    off: this.removeEvent,
-                    trigger: this.trigger,
-                    fire: this.trigger
-                });
-            },
-            initEvent: function() {
-                Utils.addEvent(this.container, "mousewheel", function(e) {
-                    e.preventDefault();
-                });
-            },
-            initScrollEvent: function() {
-                var _self = this;
-                this.kfEditor.requestService("ui.set.scrollbar.update.handler", function(proportion, offset, values) {
-                    offset = Math.floor(proportion * (values.contentWidth - values.viewWidth));
-                    _self.kfEditor.requestService("render.set.canvas.offset", offset);
-                });
-            },
-            getCanvasContainer: function() {
-                return this.canvasContainer;
-            },
-            addEvent: function(type, handler) {
-                Utils.addEvent(this.canvasContainer, type, handler);
-            },
-            removeEvent: function() {},
-            trigger: function(type) {
-                Utils.trigger(this.canvasContainer, type);
-            },
-            getLatexInput: function() {
-                return this.latexInput;
-            },
-            // 更新画布视窗， 决定是否出现滚动条
-            updateCanvasView: function() {
-                var canvas = this.kfEditor.requestService("render.get.canvas"), contentContainer = canvas.getContentContainer(), contentRect = null;
-                if (this.canvasRect === null) {
-                    // 兼容firfox， 获取容器大小，而不是获取画布大小
-                    this.canvasRect = this.canvasContainer.getBoundingClientRect();
-                }
-                contentRect = contentContainer.getRenderBox("paper");
-                if (contentRect.width > this.canvasRect.width) {
-                    if (this.viewState === VIEW_STATE.NO_OVERFLOW) {
-                        this.toggleViewState();
-                        this.kfEditor.requestService("ui.show.scrollbar");
-                        this.kfEditor.requestService("render.disable.relocation");
-                    }
-                    this.kfEditor.requestService("render.relocation");
-                    // 更新滚动条， 参数是：滚动条所控制的内容长度
-                    this.kfEditor.requestService("ui.update.scrollbar", contentRect.width);
-                    this.kfEditor.requestService("ui.relocation.scrollbar");
-                } else {
-                    if (this.viewState === VIEW_STATE.OVERFLOW) {
-                        this.toggleViewState();
-                        this.kfEditor.requestService("ui.hide.scrollbar");
-                        this.kfEditor.requestService("render.enable.relocation");
-                    }
-                    this.kfEditor.requestService("render.relocation");
-                }
-            },
-            toggleViewState: function() {
-                this.viewState = this.viewState === VIEW_STATE.NO_OVERFLOW ? VIEW_STATE.OVERFLOW : VIEW_STATE.NO_OVERFLOW;
-            }
-        });
-        function createToolbarWrap(doc) {
-            return $.ele(doc, "div", {
-                className: "kf-editor-toolbar"
-            });
-        }
-        function createToolbarContainer(doc) {
-            return $.ele(doc, "div", {
-                className: "kf-editor-inner-toolbar"
-            });
-        }
-        function createEditArea(doc) {
-            var container = doc.createElement("div");
-            container.className = "kf-editor-edit-area";
-            container.style.width = "80%";
-            container.style.height = "800px";
-            return container;
-        }
-        function createCanvasContainer(doc) {
-            var container = doc.createElement("div");
-            container.className = "kf-editor-canvas-container";
-            return container;
-        }
-        function createScrollbarContainer(doc) {
-            var container = doc.createElement("div");
-            container.className = "kf-editor-edit-scrollbar";
-            return container;
-        }
-        function creatLatexArea(doc) {
-            var container = doc.createElement("div");
-            container.className = "kf-editor-latex-area";
-            container.innerHTML = '<input type="text" class="kf-editor-latex-input">';
-            return container;
-        }
-        return UIComponent;
-    }
-};
-
 /*!
  * 启动模块
  */
-_p[50] = {
+_p[38] = {
     value: function(require) {
         var KFEditor = _p.r(12), Factory = _p.r(13);
         // 注册组件
-        KFEditor.registerComponents("ui", _p.r(49));
-        KFEditor.registerComponents("parser", _p.r(21));
-        KFEditor.registerComponents("render", _p.r(25));
-        KFEditor.registerComponents("position", _p.r(23));
-        KFEditor.registerComponents("syntax", _p.r(28));
+        KFEditor.registerComponents("ui", _p.r(28));
+        KFEditor.registerComponents("parser", _p.r(29));
+        KFEditor.registerComponents("render", _p.r(33));
+        KFEditor.registerComponents("position", _p.r(31));
+        KFEditor.registerComponents("syntax", _p.r(36));
         KFEditor.registerComponents("control", _p.r(5));
-        KFEditor.registerComponents("print", _p.r(24));
+        KFEditor.registerComponents("print", _p.r(32));
         kf.EditorFactory = Factory;
     }
 };
 
 var moduleMapping = {
-    "kf.start": 50
+    "kf.start": 38
 };
 
 function use(name) {

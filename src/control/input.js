@@ -156,11 +156,25 @@ define( function ( require, exports, module ) {
 
         insertStr: function ( str ) {
 
-            var latexInfo = this.kfEditor.requestService( "syntax.serialization" ),
+            var originString = null,
+                latexInfo = null;
+
+            str = " " + str + " ";
+
+            if ( this.latexInput === this.kfEditor.getDocument().activeElement ) {
+
+                this.latexInput.setRangeText( str );
+                originString = this.latexInput.value;
+
+            } else {
+
+                latexInfo = this.kfEditor.requestService( "syntax.serialization" );
                 originString = latexInfo.str;
 
-            // 拼接latex字符串
-            originString = originString.substring( 0, latexInfo.startOffset ) + " " + str + " " + originString.substring( latexInfo.endOffset );
+                // 拼接latex字符串
+                originString = originString.substring( 0, latexInfo.startOffset ) + str + originString.substring( latexInfo.endOffset );
+
+            }
 
             this.restruct( originString );
             this.updateInput();

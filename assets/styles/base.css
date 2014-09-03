@@ -9,34 +9,32 @@
 
     overflow: hidden;
     z-index: 2;
-    background-color: #f6f5ee;
+    background-color: #dcdee0;
 }
 
-.kf-editor-edit-area {
+.kf-editor-ui-editor-area {
     position: relative;
     top: 0;
     left: 0;
 
     z-index: 1;
-    height: 0;
     background-color: white;
-    /*background-color: white;*/
-    /*background-size: 21px 21px;*/
-    /*background-position: 0 0,10px 10px;*/
-    /*background-image: -webkit-linear-gradient(45deg,#efefef 25%,transparent 25%,transparent 75%,#efefef 75%,#efefef),-webkit-linear-gradient(45deg,#efefef 25%,transparent 25%,transparent 75%,#efefef 75%,#efefef);*/
-    /*background-image: linear-gradient(45deg,#efefef 25%,transparent 25%,transparent 75%,#efefef 75%,#efefef),linear-gradient(45deg,#efefef 25%,transparent 25%,transparent 75%,#efefef 75%,#efefef);*/
 }
 
-.kf-editor-canvas-container {
+.kf-editor-ui-canvas {
     width: 100%;
     height: 70%;
 }
 
-.kf-editor-latex-area {
+.fui-panel-content {
+    overflow: hidden;
+}
+
+.kf-editor-ui-latex-area {
     width: 100%;
     margin: 0 auto;
     height: 30%;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #dcdee0;
 }
 
 .kf-editor-latex-input {
@@ -55,4 +53,29 @@
     top: 0;
     left: -99999999px;
     z-index: 999999;
+}
+
+.kfe-ui-tabs {
+    padding: 10px;
+}
+
+.kfe-ui-tabs-btn {
+    padding: 5px 10px;
+    margin: 10px 5px 10px 0;
+    background: #dcdee0;
+    border: 1px solid #d1d1d1;
+    -webkit-box-shadow: -1px 1px 2px rgba( 0, 0, 0, 0.2 );
+}
+
+.kfe-ui-tabs .fui-selected, .kfe-ui-tabs-btn:HOVER, .kfe-ui-tabs-btn:ACTIVE {
+    background: #a6aaa9!important;
+    border-color: #9fa0a0!important;
+}
+
+.kfe-ext-disabled {
+    opacity: 0.3!important;
+}
+
+.kfe-ext-disabled:HOVER {
+    border-color: #dcdee0!important;
 }

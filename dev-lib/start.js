@@ -8,7 +8,7 @@ define( 'kf.start', function ( require ) {
         Factory = require( "editor/factory" );
 
     // 注册组件
-    KFEditor.registerComponents( "ui", require( "ui/ui" ) );
+    KFEditor.registerComponents( "ui", require( "newui/ui" ) );
     KFEditor.registerComponents( "parser", require( "parse/parser" ) );
     KFEditor.registerComponents( "render", require( "render/render" ) );
     KFEditor.registerComponents( "position", require( "position/position" ) );
