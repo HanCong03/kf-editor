@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * Kity Formula Editor - v1.0.0 - 2014-08-22
+ * Kity Formula Editor - v1.0.0 - 2014-10-26
  * https://github.com/kitygraph/formula
  * GitHub: https://github.com/kitygraph/formula.git 
  * Copyright (c) 2014 Baidu Kity Group; Licensed MIT
@@ -339,16 +339,23 @@ _p[7] = {
                 var rootInfo = null;
                 this.inputBox.focus();
                 // 如果当前不包含光标信息， 则手动设置光标信息， 以使得当前根节点被全选中
-                if (!this.kfEditor.requestService("syntax.has.cursor.info")) {
-                    rootInfo = this.kfEditor.requestService("syntax.get.root.group.info");
-                    this.kfEditor.requestService("syntax.update.record.cursor", {
-                        groupId: rootInfo.id,
-                        startOffset: 0,
-                        endOffset: rootInfo.content.length
-                    });
-                    this.kfEditor.requestService("control.update.input");
-                }
+                //            if ( !this.kfEditor.requestService( "syntax.has.cursor.info" ) ) {
+                rootInfo = this.kfEditor.requestService("syntax.get.root.group.info");
+                this.kfEditor.requestService("syntax.update.record.cursor", {
+                    groupId: rootInfo.id,
+                    startOffset: 0,
+                    endOffset: rootInfo.content.length
+                });
+                this.kfEditor.requestService("control.update.input");
+                //            } else {
+                //
+                //                var t = this.kfEditor.requestService( "syntax.get.record.cursor" );
+                //
+                //                alert(t.groupId + " ; " + t.startOffset + " ; " + t.endOffset );
+                //
+                //            }
                 this.kfEditor.requestService("control.reselect");
+                this.kfEditor.requestService("ui.toolbar.enable");
             },
             getSource: function() {
                 return this.latexInput.value.replace(/\\placeholder/g, "");
@@ -377,9 +384,17 @@ _p[7] = {
                 this.updateLatex();
             },
             insertStr: function(str) {
-                var latexInfo = this.kfEditor.requestService("syntax.serialization"), originString = latexInfo.str;
-                // 拼接latex字符串
-                originString = originString.substring(0, latexInfo.startOffset) + " " + str + " " + originString.substring(latexInfo.endOffset);
+                var originString = null, latexInfo = null;
+                str = " " + str + " ";
+                if (this.latexInput === this.kfEditor.getDocument().activeElement) {
+                    this.latexInput.setRangeText(str);
+                    originString = this.latexInput.value;
+                } else {
+                    latexInfo = this.kfEditor.requestService("syntax.serialization");
+                    originString = latexInfo.str;
+                    // 拼接latex字符串
+                    originString = originString.substring(0, latexInfo.startOffset) + str + originString.substring(latexInfo.endOffset);
+                }
                 this.restruct(originString);
                 this.updateInput();
                 this.kfEditor.requestService("ui.update.canvas.view");
@@ -420,7 +435,7 @@ _p[7] = {
 
                       case KEY_CODE.DELETE:
                         e.preventDefault();
-                        _self.delete();
+                        _self.deleteUnit();
                         isControl = true;
                         break;
 
@@ -504,7 +519,7 @@ _p[7] = {
                 this.kfEditor.requestService("syntax.cursor.move.right");
                 this.update();
             },
-            "delete": function() {
+            deleteUnit: function() {
                 var isNeedRedraw = null;
                 // 当前处于"根占位符"上，不允许删除操作
                 if (this.hasRootplaceholder()) {
@@ -521,32 +536,45 @@ _p[7] = {
                 }
             },
             newLine: function() {
-                var latexInfo = this.kfEditor.requestService("syntax.serialization"), match = null, source = null, pattern = /\\begin\{cases\}[\s\S]*?\\end\{cases\}/gi, originString = latexInfo.str;
+                var latexInfo = this.kfEditor.requestService("syntax.serialization"), match = null, source = null, index = 0, pattern = /\\begin[\s\S]*?\\end/gi, pattern = /\\begin\{([^}]+)\}[\s\S]*?\\end\{\1\}/gi, rootShape = null, beginType = null, content = null, originString = latexInfo.str;
                 while (match = pattern.exec(originString)) {
-                    source = match[0];
-                    if (source.indexOf(CURSOR_CHAR) === -1) {
-                        source = null;
+                    index = match.index;
+                    beginType = match[1];
+                    match = match[0];
+                    if (match.indexOf(CURSOR_CHAR) === -1) {
+                        match = null;
                         continue;
                     } else {
                         break;
                     }
                 }
-                if (!source) {
+                if (!match) {
                     return;
                 }
-                source = source.replace("\\begin{cases}", "").replace("\\end{cases}", "");
+                source = originString.substring(index, match.length + index);
+                source = source.replace("\\begin{" + beginType + "}", "").replace("\\end{" + beginType + "}", "");
                 source = source.split("\\\\");
                 for (var i = 0, len = source.length; i < len; i++) {
                     if (source[i].indexOf(CURSOR_CHAR) !== -1) {
+                        content = source[i];
                         source[i] = source[i].replace(CURSOR_CHAR, "").replace(CURSOR_CHAR, "");
-                        source.splice(i + 1, 0, CURSOR_CHAR + " \\placeholder " + CURSOR_CHAR);
+                        content = content.split("&");
+                        for (var j = 0, jlen = content.length; j < jlen; j++) {
+                            if (content[j].indexOf(CURSOR_CHAR) !== -1) {
+                                content[j] = CURSOR_CHAR + " \\placeholder " + CURSOR_CHAR;
+                            } else {
+                                content[j] = "\\placeholder";
+                            }
+                        }
+                        source.splice(i + 1, 0, content.join("&"));
                         break;
                     }
                 }
-                source = "\\begin{cases}" + source.join("\\\\") + "\\end{cases}";
-                this.inputBox.value = source;
-                this.inputBox.selectionStart = source.indexOf(CURSOR_CHAR);
-                this.inputBox.selectionEnd = source.lastIndexOf(CURSOR_CHAR);
+                source = "\\begin{" + beginType + "}" + source.join("\\\\") + "\\end{" + beginType + "}";
+                originString = originString.substring(0, index) + source + originString.substring(index + match.length);
+                this.inputBox.value = originString;
+                this.inputBox.selectionStart = originString.indexOf(CURSOR_CHAR);
+                this.inputBox.selectionEnd = originString.lastIndexOf(CURSOR_CHAR);
                 this.processingInput();
             },
             processUserCtrl: function(e) {
@@ -1771,6 +1799,9 @@ _p[28] = {
             constructor: function(kfEditor, options) {
                 var currentDocument = null;
                 this.options = options;
+                this.lastHeight = -1;
+                this.minHeight - 1;
+                this.notifyCallback = null;
                 this.container = kfEditor.getContainer();
                 currentDocument = this.container.ownerDocument;
                 // ui组件实例集合
@@ -1804,6 +1835,7 @@ _p[28] = {
                 this.editArea = this.editArea.getContentElement();
                 this.initComponents();
                 this.initServices();
+                this.initCommands();
                 this.initEvent();
                 this.updateContainerSize(this.container, this.toolbarWidget.getContentElement(), this.editArea);
                 this.initScrollEvent();
@@ -1813,9 +1845,45 @@ _p[28] = {
                 this.components.scrollbar = new Scrollbar(this, this.kfEditor);
             },
             updateContainerSize: function(container, toolbar, editArea) {
-                var containerBox = container.getBoundingClientRect(), toolbarBox = toolbar.getBoundingClientRect();
+                var containerBox = container.getBoundingClientRect(), toolbarBox = toolbar.getBoundingClientRect(), height = containerBox.bottom - toolbarBox.bottom;
                 editArea.style.width = containerBox.width + "px";
-                editArea.style.height = containerBox.bottom - toolbarBox.bottom + "px";
+                editArea.style.height = height + "px";
+                this.lastHeight = height - 100;
+                this.minHeight = this.lastHeight;
+                this.canvasContainer.style.height = this.lastHeight + "px";
+            },
+            updateCanvasSize: function() {
+                var rootShape = this.kfEditor.requestService("syntax.get.root"), height = -1, shapeHeight = -1;
+                shapeHeight = rootShape.getRenderBox("paper").height;
+                if (shapeHeight < this.lastHeight) {
+                    height = this.minHeight + 100;
+                    if (shapeHeight + 100 < this.lastHeight) {
+                        height = this.lastHeight - Math.max(shapeHeight, this.minHeight);
+                        height = Math.floor(height / 100);
+                        if (height === 0) {
+                            return;
+                        }
+                        this.updateHeight(-height * 100);
+                    }
+                } else {
+                    this.updateHeight(Math.ceil((shapeHeight - this.lastHeight) / 100) * 100);
+                }
+            },
+            updateHeight: function(diff) {
+                this.lastHeight += diff;
+                this.canvasContainer.style.height = this.lastHeight + "px";
+                this.editArea.style.height = this.lastHeight + 100 + "px";
+                this.container.style.height = $(this.container).height() + diff + "px";
+                this.notifyContainer(diff);
+            },
+            notifyContainer: function(changeValue) {
+                if (!this.notifyCallback) {
+                    return;
+                }
+                this.notifyCallback(changeValue);
+            },
+            setNotify: function(cb) {
+                this.notifyCallback = cb;
             },
             // 初始化服务
             initServices: function() {
@@ -1834,6 +1902,9 @@ _p[28] = {
                     trigger: this.trigger,
                     fire: this.trigger
                 });
+                this.kfEditor.registerService("ui.update.canvas.size", this, {
+                    updateCanvasSize: this.updateCanvasSize
+                });
                 this.kfEditor.registerService("ui.toolbar.disable", this, {
                     disableToolbar: this.disableToolbar
                 });
@@ -1843,6 +1914,9 @@ _p[28] = {
                 this.kfEditor.registerService("ui.toolbar.close", this, {
                     closeToolbar: this.closeToolbar
                 });
+            },
+            initCommands: function() {
+                this.kfEditor.registerCommand("resize.notify", this, this.setNotify);
             },
             initEvent: function() {
                 var editor = this.kfEditor;
@@ -1902,6 +1976,7 @@ _p[28] = {
                     }
                     this.kfEditor.requestService("render.relocation");
                 }
+                this.updateCanvasSize();
             },
             toggleViewState: function() {
                 this.viewState = this.viewState === VIEW_STATE.NO_OVERFLOW ? VIEW_STATE.OVERFLOW : VIEW_STATE.NO_OVERFLOW;
@@ -2061,15 +2136,12 @@ _p[29] = {
      * @returns {boolean}
      */
         function onlyPlaceholder(operands) {
-            var result = 1;
-            if (operands.length > 3) {
+            var result = operands.length;
+            if (result > 3) {
                 return false;
             }
             for (var i = 0, len = operands.length; i < len; i++) {
-                if (operands[i] === CURSOR_CHAR) {
-                    continue;
-                }
-                if (operands[i] && operands[i].name === "placeholder") {
+                if (operands[i] === CURSOR_CHAR || operands[i].name === "placeholder") {
                     result--;
                 }
             }
@@ -2773,6 +2845,9 @@ _p[34] = {
             },
             // 选中给定ID节点的父容器
             selectParentContainer: function(groupId) {
+                if (this.parentComponent.isRootNode(groupId)) {
+                    return this.parentComponent.getCursorRecord();
+                }
                 var currentGroupNode = this.parentComponent.getGroupObject(groupId).node, parentContainerInfo = this.kfEditor.requestService("position.get.group", currentGroupNode), // 当前组在父容器中的索引
                 index = this.kfEditor.requestService("position.get.index", parentContainerInfo.groupObj, currentGroupNode);
                 // 返回新的光标信息
@@ -2926,7 +3001,7 @@ _p[35] = {
                             startOffset: groupInfo.content.length - 1,
                             endOffset: groupInfo.content.length
                         };
-                    } else if (isContainerNode(groupElement) && groupInfo.content.length === 1) {
+                    } else if (isContainerNode(groupElement) && groupInfo.content.length >= 1) {
                         return locateLeftIndex(moveComponent, groupElement);
                     }
                     return {
@@ -2972,21 +3047,29 @@ _p[35] = {
                 }
                 // 如果父组是一个容器， 并且该容器包含不止一个节点， 则跳到父组开头
                 if (isContainerNode(outerGroupInfo.group.groupObj) && outerGroupInfo.group.content.length > 1) {
-                    return {
-                        groupId: outerGroupInfo.group.id,
-                        startOffset: 0,
-                        endOffset: 0
-                    };
+                    if (outerGroupInfo.index !== 0) {
+                        return {
+                            groupId: outerGroupInfo.group.id,
+                            startOffset: 0,
+                            endOffset: 0
+                        };
+                    }
                 }
                 outerGroupInfo = kfEditor.requestService("position.get.parent.info", outerGroupInfo.group.groupObj);
             }
-            // 如果外部组是容器， 则直接定位即可
+            // 如果外部组是容器
             if (isContainerNode(outerGroupInfo.group.groupObj)) {
-                return {
-                    groupId: outerGroupInfo.group.id,
-                    startOffset: outerGroupInfo.index,
-                    endOffset: outerGroupInfo.index
-                };
+                var target = outerGroupInfo.group.content[outerGroupInfo.index - 1];
+                // 如果内部元素不是一个容器，则直接定位即可
+                if (!isContainerNode(target)) {
+                    return {
+                        groupId: outerGroupInfo.group.id,
+                        startOffset: outerGroupInfo.index,
+                        endOffset: outerGroupInfo.index
+                    };
+                } else {
+                    return locateLeftIndex(moveComponent, target);
+                }
             }
             groupNode = outerGroupInfo.group.content[outerGroupInfo.index - 1];
             // 定位到的组是一个容器， 则定位到容器尾部
@@ -3079,11 +3162,13 @@ _p[35] = {
                 }
                 // 如果父组是一个容器， 并且该容器包含不止一个节点， 则跳到父组末尾
                 if (isContainerNode(outerGroupInfo.group.groupObj) && outerGroupInfo.group.content.length > 1) {
-                    return {
-                        groupId: outerGroupInfo.group.id,
-                        startOffset: outerGroupInfo.group.content.length,
-                        endOffset: outerGroupInfo.group.content.length
-                    };
+                    if (outerGroupInfo.index !== outerGroupInfo.group.content.length - 1) {
+                        return {
+                            groupId: outerGroupInfo.group.id,
+                            startOffset: outerGroupInfo.group.content.length,
+                            endOffset: outerGroupInfo.group.content.length
+                        };
+                    }
                 }
                 outerGroupInfo = kfEditor.requestService("position.get.parent.info", outerGroupInfo.group.groupObj);
             }
@@ -3103,11 +3188,7 @@ _p[35] = {
                         endOffset: 1
                     };
                 }
-                return {
-                    groupId: groupNode.id,
-                    startOffset: 0,
-                    endOffset: 0
-                };
+                return locateRightIndex(moveComponent, groupNode);
             }
             return {
                 groupId: outerGroupInfo.group.id,
@@ -3161,7 +3242,7 @@ _p[36] = {
             },
             initComponents: function() {
                 this.components.move = new MoveComponent(this, this.kfEditor);
-                this.components.delete = new DeleteComponent(this, this.kfEditor);
+                this.components.deleteComp = new DeleteComponent(this, this.kfEditor);
             },
             initServices: function() {
                 this.kfEditor.registerService("syntax.update.objtree", this, {
@@ -3427,7 +3508,7 @@ _p[36] = {
             },
             // 根据当前光标的信息，删除组
             deleteGroup: function() {
-                return this.components.delete.deleteGroup();
+                return this.components.deleteComp.deleteGroup();
             },
             insertSubtree: function(subtree) {
                 var cursorInfo = this.record.cursor, // 当前光标信息所在的子树

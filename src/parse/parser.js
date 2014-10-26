@@ -220,19 +220,15 @@ define( function ( require ) {
      */
     function onlyPlaceholder ( operands ) {
 
-        var result = 1;
+        var result = operands.length;
 
-        if ( operands.length > 3 ) {
+        if ( result > 3 ) {
             return false;
         }
 
         for ( var i = 0, len = operands.length; i < len; i++ ) {
 
-            if ( operands[ i ] === CURSOR_CHAR ) {
-                continue;
-            }
-
-            if ( operands[ i ] && operands[ i ].name === "placeholder" ) {
+            if ( operands[ i ] === CURSOR_CHAR || operands[ i ].name === "placeholder" ) {
                 result--;
             }
 

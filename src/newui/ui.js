@@ -23,6 +23,9 @@ define( function ( require ) {
                 var currentDocument = null;
 
                 this.options = options;
+                this.lastHeight = -1;
+                this.minHeight -1;
+                this.notifyCallback = null;
 
                 this.container = kfEditor.getContainer();
 
@@ -62,8 +65,8 @@ define( function ( require ) {
                 this.scrollbarContainer = createScrollbarContainer( currentDocument );
 
                 this.toolbarWidget.appendTo( this.container );
-                this.latexArea.appendTo( this.editArea );
                 this.canvasContainer.appendTo( this.editArea );
+                this.latexArea.appendTo( this.editArea );
                 this.editArea.appendTo( this.container );
 
                 this.container.appendChild( this.scrollbarContainer );
@@ -74,6 +77,7 @@ define( function ( require ) {
                 this.initComponents();
 
                 this.initServices();
+                this.initCommands();
 
                 this.initEvent();
 
@@ -93,11 +97,73 @@ define( function ( require ) {
             updateContainerSize: function ( container, toolbar, editArea ) {
 
                 var containerBox = container.getBoundingClientRect(),
-                    toolbarBox = toolbar.getBoundingClientRect();
+                    toolbarBox = toolbar.getBoundingClientRect(),
+                    height = containerBox.bottom - toolbarBox.bottom;
 
                 editArea.style.width = containerBox.width + "px";
-                editArea.style.height = containerBox.bottom - toolbarBox.bottom + "px";
+                editArea.style.height = height + "px";
 
+                this.lastHeight = height - 100;
+                this.minHeight = this.lastHeight;
+                this.canvasContainer.style.height = this.lastHeight + 'px';
+
+            },
+
+            updateCanvasSize: function () {
+
+                var rootShape = this.kfEditor.requestService( 'syntax.get.root' ),
+                    height = -1,
+                    shapeHeight = -1;
+
+                shapeHeight = rootShape.getRenderBox( "paper" ).height;
+
+                if ( shapeHeight < this.lastHeight ) {
+
+                    height = this.minHeight + 100;
+
+                    if ( shapeHeight + 100 < this.lastHeight ) {
+
+                        height = this.lastHeight - Math.max( shapeHeight, this.minHeight );
+                        height = Math.floor( height / 100 );
+
+                        if ( height === 0 ) {
+                            return;
+                        }
+
+                        this.updateHeight( -height * 100 );
+                    }
+
+                } else {
+
+                    this.updateHeight( Math.ceil( ( shapeHeight - this.lastHeight ) / 100 ) * 100 );
+
+                }
+
+            },
+
+            updateHeight: function ( diff ) {
+
+                this.lastHeight += diff;
+                this.canvasContainer.style.height = this.lastHeight + 'px';
+                this.editArea.style.height = this.lastHeight + 100 + 'px';
+                this.container.style.height = $( this.container ).height() + diff + 'px';
+
+                this.notifyContainer( diff );
+
+            },
+
+            notifyContainer: function ( changeValue ) {
+
+                if ( !this.notifyCallback ) {
+                    return;
+                }
+
+                this.notifyCallback( changeValue );
+
+            },
+
+            setNotify: function ( cb ) {
+                this.notifyCallback = cb;
             },
 
             // 初始化服务
@@ -122,6 +188,10 @@ define( function ( require ) {
                     fire: this.trigger
                 } );
 
+                this.kfEditor.registerService( 'ui.update.canvas.size', this, {
+                    updateCanvasSize: this.updateCanvasSize
+                } );
+
                 this.kfEditor.registerService( "ui.toolbar.disable", this, {
                     disableToolbar: this.disableToolbar
                 } );
@@ -134,6 +204,10 @@ define( function ( require ) {
                     closeToolbar: this.closeToolbar
                 } );
 
+            },
+
+            initCommands: function () {
+                this.kfEditor.registerCommand( "resize.notify", this, this.setNotify );
             },
 
             initEvent: function () {
@@ -233,6 +307,8 @@ define( function ( require ) {
 
                 }
 
+                this.updateCanvasSize();
+
             },
 
             toggleViewState: function () {
@@ -260,7 +336,7 @@ define( function ( require ) {
     }
 
     function creatLatexInput ( doc ) {
-        var container = doc.createElement( "input" );
+        var container = doc.createElement( "textarea" );
         container.className = "kf-editor-latex-input";
 
         return container;

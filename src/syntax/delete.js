@@ -224,6 +224,10 @@ define( function ( require, exports, module ) {
         // 选中给定ID节点的父容器
         selectParentContainer: function ( groupId ) {
 
+            if ( this.parentComponent.isRootNode( groupId ) ) {
+                return this.parentComponent.getCursorRecord();
+            }
+
             var currentGroupNode = this.parentComponent.getGroupObject( groupId ).node,
                 parentContainerInfo = this.kfEditor.requestService( "position.get.group", currentGroupNode ),
                 // 当前组在父容器中的索引

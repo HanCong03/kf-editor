@@ -37,7 +37,10 @@
 
                 // this指向KFEditor
 
-                this.execCommand( "render", "\\begin{cases}a+b\\\\a-d\\end{cases}" );
+                this.execCommand( "render", "{\\begin{pmatrix} {\\placeholder }&{\\placeholder } \\\\ {\\placeholder }&{\\placeholder } \\end{pmatrix}}" );
+//                this.execCommand( "render", "\\placeholder" );
+//                this.execCommand( "render", "\\begin{array}{ccc}a&+&b\\\\c&-&d\\end{array}" );
+//                this.execCommand( "render", "\\begin{cases}a+b\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\end{cases}" );
                 this.execCommand( "focus" );
 
                 window.kfe = this;

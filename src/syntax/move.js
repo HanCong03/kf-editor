@@ -227,7 +227,7 @@ define( function ( require, exports, module ) {
                     };
 
                 // 内部元素仍然是一个容器并且只有这一个内部元素，则进行递归处理
-                } else if ( isContainerNode( groupElement ) && groupInfo.content.length === 1 ) {
+                } else if ( isContainerNode( groupElement ) && groupInfo.content.length >= 1 ) {
                     return locateLeftIndex( moveComponent, groupElement );
                 }
 
@@ -293,24 +293,40 @@ define( function ( require, exports, module ) {
 
             // 如果父组是一个容器， 并且该容器包含不止一个节点， 则跳到父组开头
             if ( isContainerNode( outerGroupInfo.group.groupObj ) && outerGroupInfo.group.content.length > 1 ) {
-                return {
-                    groupId: outerGroupInfo.group.id,
-                    startOffset: 0,
-                    endOffset: 0
-                };
+
+                if ( outerGroupInfo.index !== 0 ) {
+
+                    return {
+                        groupId: outerGroupInfo.group.id,
+                        startOffset: 0,
+                        endOffset: 0
+                    };
+
+                }
+
             }
 
             outerGroupInfo = kfEditor.requestService( "position.get.parent.info", outerGroupInfo.group.groupObj );
 
         }
 
-        // 如果外部组是容器， 则直接定位即可
+        // 如果外部组是容器
         if ( isContainerNode( outerGroupInfo.group.groupObj ) ) {
-            return {
-                groupId: outerGroupInfo.group.id,
-                startOffset: outerGroupInfo.index,
-                endOffset: outerGroupInfo.index
-            };
+
+            var target = outerGroupInfo.group.content[ outerGroupInfo.index - 1 ];
+            // 如果内部元素不是一个容器，则直接定位即可
+            if ( !isContainerNode( target ) ) {
+                return {
+                    groupId: outerGroupInfo.group.id,
+                    startOffset: outerGroupInfo.index,
+                    endOffset: outerGroupInfo.index
+                };
+            } else {
+
+                return locateLeftIndex( moveComponent, target );
+
+            }
+
         }
 
         groupNode = outerGroupInfo.group.content[ outerGroupInfo.index - 1 ];
@@ -444,11 +460,15 @@ define( function ( require, exports, module ) {
 
             // 如果父组是一个容器， 并且该容器包含不止一个节点， 则跳到父组末尾
             if ( isContainerNode( outerGroupInfo.group.groupObj ) && outerGroupInfo.group.content.length > 1 ) {
-                return {
-                    groupId: outerGroupInfo.group.id,
-                    startOffset: outerGroupInfo.group.content.length,
-                    endOffset: outerGroupInfo.group.content.length
-                };
+
+                if ( outerGroupInfo.index !== outerGroupInfo.group.content.length - 1 ) {
+                    return {
+                        groupId: outerGroupInfo.group.id,
+                        startOffset: outerGroupInfo.group.content.length,
+                        endOffset: outerGroupInfo.group.content.length
+                    };
+                }
+
             }
 
             outerGroupInfo = kfEditor.requestService( "position.get.parent.info", outerGroupInfo.group.groupObj );
@@ -478,11 +498,12 @@ define( function ( require, exports, module ) {
 
             }
 
-            return {
-                groupId: groupNode.id,
-                startOffset: 0,
-                endOffset: 0
-            };
+            return locateRightIndex( moveComponent, groupNode );
+//            return {
+//                groupId: groupNode.id,
+//                startOffset: 0,
+//                endOffset: 0
+//            };
 
         }
 

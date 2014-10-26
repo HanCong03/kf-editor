@@ -44,7 +44,7 @@ define( function ( require ) {
 
             initComponents: function () {
                 this.components.move = new MoveComponent( this, this.kfEditor );
-                this.components.delete = new DeleteComponent( this, this.kfEditor );
+                this.components.deleteComp = new DeleteComponent( this, this.kfEditor );
             },
 
             initServices: function () {
@@ -441,7 +441,7 @@ define( function ( require ) {
             // 根据当前光标的信息，删除组
             deleteGroup: function () {
 
-                return this.components.delete.deleteGroup();
+                return this.components.deleteComp.deleteGroup();
 
             },
 

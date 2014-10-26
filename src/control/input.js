@@ -97,7 +97,7 @@ define( function ( require, exports, module ) {
             this.inputBox.focus();
 
             // 如果当前不包含光标信息， 则手动设置光标信息， 以使得当前根节点被全选中
-            if ( !this.kfEditor.requestService( "syntax.has.cursor.info" ) ) {
+//            if ( !this.kfEditor.requestService( "syntax.has.cursor.info" ) ) {
 
                 rootInfo = this.kfEditor.requestService( "syntax.get.root.group.info" );
 
@@ -109,9 +109,17 @@ define( function ( require, exports, module ) {
 
                 this.kfEditor.requestService( "control.update.input" );
 
-            }
+//            } else {
+//
+//                var t = this.kfEditor.requestService( "syntax.get.record.cursor" );
+//
+//                alert(t.groupId + " ; " + t.startOffset + " ; " + t.endOffset );
+//
+//            }
 
-            this.kfEditor.requestService( "control.reselect" );
+            this.kfEditor.requestService( "control.reselect" )
+
+            this.kfEditor.requestService( "ui.toolbar.enable" );
 
         },
 
@@ -230,7 +238,7 @@ define( function ( require, exports, module ) {
 
                     case KEY_CODE.DELETE:
                         e.preventDefault();
-                        _self.delete();
+                        _self.deleteUnit();
                         isControl = true;
                         break;
 
@@ -360,7 +368,7 @@ define( function ( require, exports, module ) {
 
         },
 
-        delete: function () {
+        deleteUnit: function () {
 
             var isNeedRedraw = null;
 
@@ -387,15 +395,23 @@ define( function ( require, exports, module ) {
             var latexInfo = this.kfEditor.requestService( "syntax.serialization" ),
                 match = null,
                 source = null,
-                pattern = /\\begin\{cases\}[\s\S]*?\\end\{cases\}/ig,
+                index = 0,
+                pattern = /\\begin[\s\S]*?\\end/ig,
+                pattern = /\\begin\{([^}]+)\}[\s\S]*?\\end\{\1\}/ig,
+                rootShape = null,
+                beginType = null,
+                content = null,
                 originString = latexInfo.str;
 
             while ( match = pattern.exec( originString ) ) {
 
-                source = match[0];
+                index = match.index;
 
-                if ( source.indexOf( CURSOR_CHAR ) === -1 ) {
-                    source = null;
+                beginType = match[1];
+                match = match[0];
+
+                if ( match.indexOf( CURSOR_CHAR ) === -1 ) {
+                    match = null;
                     continue;
                 } else {
                     break;
@@ -403,29 +419,45 @@ define( function ( require, exports, module ) {
 
             }
 
-            if ( !source ) {
+            if ( !match ) {
                 return;
             }
 
-            source = source.replace( "\\begin{cases}", "" ).replace( "\\end{cases}", "" );
+            source = originString.substring( index, match.length + index );
+
+            source = source.replace( "\\begin{"+ beginType +"}", "" ).replace( "\\end{"+ beginType +"}", "" );
 
             source = source.split( "\\\\" );
 
             for ( var i = 0, len = source.length; i < len; i++ ) {
 
                 if ( source[ i ].indexOf( CURSOR_CHAR ) !== -1 ) {
+                    content = source[i];
                     source[ i ] = source[ i ].replace( CURSOR_CHAR, "" ).replace( CURSOR_CHAR, "" );
-                    source.splice( i+1, 0, CURSOR_CHAR + " \\placeholder "+ CURSOR_CHAR );
+
+                    content = content.split( "&" );
+
+                    for ( var j = 0, jlen = content.length; j < jlen; j++ ) {
+                        if ( content[j].indexOf( CURSOR_CHAR ) !== -1 ) {
+                            content[ j ] = CURSOR_CHAR + " \\placeholder "+ CURSOR_CHAR;
+                        } else {
+                            content[ j ] = "\\placeholder";
+                        }
+                    }
+
+                    source.splice( i+1, 0, content.join( "&" ) );
                     break;
+
                 }
 
             }
 
-            source = "\\begin{cases}" + source.join( "\\\\" ) + "\\end{cases}";
+            source = "\\begin{"+ beginType +"}" + source.join( "\\\\" ) + "\\end{"+ beginType +"}";
 
-            this.inputBox.value = source;
-            this.inputBox.selectionStart = source.indexOf( CURSOR_CHAR );
-            this.inputBox.selectionEnd = source.lastIndexOf( CURSOR_CHAR );
+            originString = originString.substring( 0, index ) + source + originString.substring( index + match.length );
+            this.inputBox.value = originString;
+            this.inputBox.selectionStart = originString.indexOf( CURSOR_CHAR );
+            this.inputBox.selectionEnd = originString.lastIndexOf( CURSOR_CHAR );
 
             this.processingInput();
 
