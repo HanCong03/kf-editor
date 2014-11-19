@@ -24,6 +24,7 @@
     <script>
         jQuery( function ($) {
 
+            var start = new Date();
             var factory = kf.EditorFactory.create( $( "#kfEditorContainer" )[ 0 ], {
                 render: {
                     fontsize: 20
@@ -35,9 +36,17 @@
 
             factory.ready( function ( KFEditor ) {
 
+                console.log( new Date() - start )
                 // this指向KFEditor
 
-                this.execCommand( "render", "{\\begin{pmatrix} {\\placeholder }&{\\placeholder } \\\\ {\\placeholder }&{\\placeholder } \\end{pmatrix}}" );
+                // 在输入时自定义处理函数
+                this.onInput( function ( value ) {
+                    return value.replace( /(?!\\)sin/g, '\\sin ' );
+                } );
+
+//                this.execCommand( 'render', "\\sin{}" );
+                this.execCommand( 'render', '{\\begin{split}{\\placeholder} & {\\placeholder} \\\\ & {\\placeholder} \\\\ & {\\placeholder}\\end{split}}' );
+//                this.execCommand( "render", "{\\begin{pmatrix} {\\placeholder }&{\\placeholder } \\\\ {\\placeholder }&{\\placeholder } \\end{pmatrix}}" );
 //                this.execCommand( "render", "\\placeholder" );
 //                this.execCommand( "render", "\\begin{array}{ccc}a&+&b\\\\c&-&d\\end{array}" );
 //                this.execCommand( "render", "\\begin{cases}a+b\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\\\a-d\\end{cases}" );
@@ -56,6 +65,6 @@
     <link rel="stylesheet" href="assets/theme/default/fui.ext.css">
 </head>
 <body>
-    <div id="kfEditorContainer" class="kf-editor" style="width: 780px; height: 502px; position: absolute; top: 20px; left: 50px;"></div>
+    <div id="kfEditorContainer" class="kf-editor" style="width: 780px; height: 302px; position: absolute; top: 20px; left: 50px;"></div>
 </body>
 </html>

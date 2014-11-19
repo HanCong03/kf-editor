@@ -15,7 +15,26 @@ define( function () {
         "superscript": true,
         "subscript": true,
         "brackets": true,
-        "function": true
+        "function": true,
+        "cases": true,
+        "split": true,
+        "mathcal": true,
+        "overparen": true,
+        "underbrace": true,
+        "mathfrak": true,
+        "mathbf": true,
+        "mathbb": true,
+        "mathrm": true,
+        "hat": true,
+        "vec": true,
+        "overrightarrow": true,
+        "widehat": true,
+        "vmatrix": true,
+        "pmatrix": true,
+        "textcircled": true,
+        "product": true,
+        "pmod": true,
+        "overline": true
 
     };
 

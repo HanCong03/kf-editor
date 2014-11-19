@@ -23,7 +23,7 @@
 
 .kf-editor-ui-canvas {
     width: 59%;
-    border-right: 1px solid black;
+    border-right: 1px solid #dcdee0;
 }
 
 .fui-panel-content {
@@ -31,16 +31,16 @@
 }
 
 .kf-editor-ui-latex-area {
-    width: 40%;
-    height: 100%;
-    border-bottom: 1px solid #dcdee0;
+    width: 36%;
+    height: 96%;
+    padding: 2%;
 }
 
 .kf-editor-latex-input {
     border: 0;
     width: 100%;
     height: 100%;
-    font-size: 18px;
+    font-size: 12px;
     outline: none;
     background: transparent;
     padding: 0;

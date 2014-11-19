@@ -306,6 +306,18 @@ define( function ( require, exports, module ) {
 
             }
 
+            if (isGroupNode(outerGroupInfo.group.groupObj) && isNotCombination(outerGroupInfo.group.groupObj)) {
+
+                outerGroupInfo = kfEditor.requestService( "position.get.parent.info", outerGroupInfo.group.groupObj );
+
+                return {
+                    groupId: outerGroupInfo.group.id,
+                    startOffset: outerGroupInfo.index,
+                    endOffset: outerGroupInfo.index
+                };
+
+            }
+
             outerGroupInfo = kfEditor.requestService( "position.get.parent.info", outerGroupInfo.group.groupObj );
 
         }
@@ -433,7 +445,7 @@ define( function ( require, exports, module ) {
     }
 
     // 右移外部定位
-    function locateOuterRightIndex ( moveComponent, groupNode ) {
+    function locateOuterRightIndex ( moveComponent, groupNode, isBreak ) {
 
         var kfEditor = moveComponent.kfEditor,
             syntaxComponent = moveComponent.parentComponent,
@@ -458,14 +470,23 @@ define( function ( require, exports, module ) {
                 };
             }
 
+            if (isGroupNode(outerGroupInfo.group.groupObj) && isNotCombination(outerGroupInfo.group.groupObj) ) {
+                outerGroupInfo = kfEditor.requestService( "position.get.parent.info", outerGroupInfo.group.groupObj );
+                return {
+                    groupId: outerGroupInfo.group.id,
+                    startOffset: outerGroupInfo.index + 1,
+                    endOffset: outerGroupInfo.index + 1
+                };
+            }
+
             // 如果父组是一个容器， 并且该容器包含不止一个节点， 则跳到父组末尾
             if ( isContainerNode( outerGroupInfo.group.groupObj ) && outerGroupInfo.group.content.length > 1 ) {
 
-                if ( outerGroupInfo.index !== outerGroupInfo.group.content.length - 1 ) {
+                if ( outerGroupInfo.index < outerGroupInfo.group.content.length ) {
                     return {
                         groupId: outerGroupInfo.group.id,
-                        startOffset: outerGroupInfo.group.content.length,
-                        endOffset: outerGroupInfo.group.content.length
+                        startOffset: outerGroupInfo.index + 1,
+                        endOffset: outerGroupInfo.index + 1
                     };
                 }
 
@@ -479,7 +500,14 @@ define( function ( require, exports, module ) {
 
         // 空节点处理
         if ( isEmptyNode( groupNode ) ) {
-            return locateOuterRightIndex( moveComponent, groupNode );
+            // 直接跳到末尾
+            //outerGroupInfo = kfEditor.requestService( "position.get.parent.info", outerGroupInfo.group.groupObj );
+            return locateOuterRightIndex( moveComponent, groupNode, true );
+            //return {
+            //    groupId: outerGroupInfo.group.id,
+            //    startOffset: outerGroupInfo.index + 1,
+            //    endOffset: outerGroupInfo.index + 1
+            //};
         }
 
         // 定位到的组是一个容器， 则定位到容器内部开头位置上
@@ -525,9 +553,18 @@ define( function ( require, exports, module ) {
         return node.getAttribute( "data-type" ) === "kf-editor-group";
     }
 
+    function isVirtualNode ( node ) {
+        var dataType = node.getAttribute( "data-type" );
+        return dataType === "kf-editor-virtual-group";
+    }
+
     function isGroupNode ( node ) {
         var dataType = node.getAttribute( "data-type" );
         return dataType === "kf-editor-group" || dataType === "kf-editor-virtual-group";
+    }
+
+    function isNotCombination (node) {
+        return node.getAttribute("data-flag").toLocaleLowerCase() !== "combination";
     }
 
     function isPlaceholderNode ( node ) {

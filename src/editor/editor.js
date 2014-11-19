@@ -102,6 +102,20 @@ define( function ( require ) {
 
         },
 
+        onInput: function ( cb ) {
+            this.__onViewInputHandler = cb;
+        },
+
+        triggerInputEvent: function ( value ) {
+
+            if ( !this.__onViewInputHandler ) {
+                return null;
+            }
+
+            return this.__onViewInputHandler.call( null, value );
+
+        },
+
         /**
          * 初始化同步组件
          */

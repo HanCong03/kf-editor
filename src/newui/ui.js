@@ -103,7 +103,7 @@ define( function ( require ) {
                 editArea.style.width = containerBox.width + "px";
                 editArea.style.height = height + "px";
 
-                this.lastHeight = height - 100;
+                this.lastHeight = height;
                 this.minHeight = this.lastHeight;
                 this.canvasContainer.style.height = this.lastHeight + 'px';
 
@@ -119,9 +119,9 @@ define( function ( require ) {
 
                 if ( shapeHeight < this.lastHeight ) {
 
-                    height = this.minHeight + 100;
+                    height = this.minHeight;
 
-                    if ( shapeHeight + 100 < this.lastHeight ) {
+                    if ( shapeHeight < this.lastHeight ) {
 
                         height = this.lastHeight - Math.max( shapeHeight, this.minHeight );
                         height = Math.floor( height / 100 );
@@ -145,7 +145,7 @@ define( function ( require ) {
 
                 this.lastHeight += diff;
                 this.canvasContainer.style.height = this.lastHeight + 'px';
-                this.editArea.style.height = this.lastHeight + 100 + 'px';
+                this.editArea.style.height = this.lastHeight + 'px';
                 this.container.style.height = $( this.container ).height() + diff + 'px';
 
                 this.notifyContainer( diff );
@@ -318,11 +318,11 @@ define( function ( require ) {
             },
 
             disableToolbar: function () {
-                this.toolbarWidget.disable();
+                //this.toolbarWidget.disable();
             },
 
             enableToolbar: function () {
-                this.toolbarWidget.enable();
+                //this.toolbarWidget.enable();
             },
 
             closeToolbar: function () {}

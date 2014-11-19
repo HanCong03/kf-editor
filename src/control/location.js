@@ -51,7 +51,7 @@ define( function ( require, exports, module ) {
 
         createCursor: function () {
 
-            var cursorShape = new kity.Rect( 1, 0, 0, 0 ).fill( "black" );
+            var cursorShape = new kity.Rect( 1, 0, 0, 0 ).fill( "red" );
 
             cursorShape.setAttr( "style", "display: none" );
 
@@ -171,6 +171,17 @@ define( function ( require, exports, module ) {
                 canvasZoom = this.kfEditor.requestService( "render.get.canvas.zoom" ),
                 formulaZoom = this.paper.getZoom();
 
+            if ( !focusChildRect ) {
+                var tmp = this.kfEditor.requestService("position.get.group.info", groupInfo.groupObj);
+                this.kfEditor.requestService( "syntax.update.record.cursor", {
+                    groupId: tmp.group.id,
+                    startOffset: tmp.index + 1,
+                    endOffset: tmp.index + 1
+                } );
+                this.updateCursor();
+                return;
+            }
+
             this.cursorShape.setHeight( focusChildRect.height / canvasZoom / formulaZoom );
 
             // 计算光标偏移位置
@@ -230,7 +241,7 @@ define( function ( require, exports, module ) {
     } );
 
     function getRect ( node ) {
-        return node.getBoundingClientRect();
+        return node && node.getBoundingClientRect();
     }
 
 } );

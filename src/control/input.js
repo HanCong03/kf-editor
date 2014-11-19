@@ -16,6 +16,13 @@ define( function ( require, exports, module ) {
             ENTER: 13,
             // 输入法特殊处理
             INPUT: 229
+        },
+        CHARS = {
+            "，": ",",
+            "。": ".",
+            "；": ";",
+            "）": ")",
+            "（": "("
         };
 
     return kity.createClass( "InputComponent", {
@@ -84,7 +91,8 @@ define( function ( require, exports, module ) {
             // focus是否可信
             box.isTrusted = false;
 
-            editorContainer.appendChild( box );
+            box.style.cssText = 'position: fixed;top: 0;left: -99999999px;';
+            top.document.body.appendChild( box );
 
             return box;
 
@@ -165,6 +173,8 @@ define( function ( require, exports, module ) {
         insertStr: function ( str ) {
 
             var originString = null,
+                prevStr = null,
+                nextStr = null,
                 latexInfo = null;
 
             str = " " + str + " ";
@@ -180,7 +190,16 @@ define( function ( require, exports, module ) {
                 originString = latexInfo.str;
 
                 // 拼接latex字符串
-                originString = originString.substring( 0, latexInfo.startOffset ) + str + originString.substring( latexInfo.endOffset );
+                prevStr = originString.substring( 0, latexInfo.startOffset );
+                nextStr = originString.substring( latexInfo.endOffset );
+
+                if ( str.indexOf( "\\placeholder" ) !== -1 ) {
+                    prevStr = prevStr.replace( CURSOR_CHAR, '' ).replace( CURSOR_CHAR, '' );
+                    nextStr = nextStr.replace( CURSOR_CHAR, '' ).replace( CURSOR_CHAR, '' );
+                    str = str.replace( "\\placeholder", "{" + CURSOR_CHAR + "\\placeholder" + CURSOR_CHAR + "}" );
+                }
+
+                originString = prevStr + str + nextStr;
 
             }
 
@@ -396,7 +415,6 @@ define( function ( require, exports, module ) {
                 match = null,
                 source = null,
                 index = 0,
-                pattern = /\\begin[\s\S]*?\\end/ig,
                 pattern = /\\begin\{([^}]+)\}[\s\S]*?\\end\{\1\}/ig,
                 rootShape = null,
                 beginType = null,
@@ -432,21 +450,28 @@ define( function ( require, exports, module ) {
             for ( var i = 0, len = source.length; i < len; i++ ) {
 
                 if ( source[ i ].indexOf( CURSOR_CHAR ) !== -1 ) {
-                    content = source[i];
-                    source[ i ] = source[ i ].replace( CURSOR_CHAR, "" ).replace( CURSOR_CHAR, "" );
 
-                    content = content.split( "&" );
+                    if ( beginType === 'split' ) {
+                        source[ i ] = source[ i ].replace( CURSOR_CHAR, "" ).replace( CURSOR_CHAR, "" );
+                        source.splice( i+1, 0, "&{" + CURSOR_CHAR + " \\placeholder "+ CURSOR_CHAR + "}" );
+                        break;
+                    } else {
+                        content = source[i];
+                        source[ i ] = source[ i ].replace( CURSOR_CHAR, "" ).replace( CURSOR_CHAR, "" );
 
-                    for ( var j = 0, jlen = content.length; j < jlen; j++ ) {
-                        if ( content[j].indexOf( CURSOR_CHAR ) !== -1 ) {
-                            content[ j ] = CURSOR_CHAR + " \\placeholder "+ CURSOR_CHAR;
-                        } else {
-                            content[ j ] = "\\placeholder";
+                        content = content.split( "&" );
+
+                        for ( var j = 0, jlen = content.length; j < jlen; j++ ) {
+                            if ( content[j].indexOf( CURSOR_CHAR ) !== -1 ) {
+                                content[ j ] = CURSOR_CHAR + " \\placeholder "+ CURSOR_CHAR;
+                            } else {
+                                content[ j ] = "\\placeholder";
+                            }
                         }
-                    }
 
-                    source.splice( i+1, 0, content.join( "&" ) );
-                    break;
+                        source.splice( i+1, 0, content.join( "&" ) );
+                        break;
+                    }
 
                 }
 
@@ -504,8 +529,17 @@ define( function ( require, exports, module ) {
 
         processingInput: function () {
 
-            this.restruct( this.inputBox.value );
-            this.latexInput.value = this.inputBox.value.replace( CURSOR_CHAR, '' ).replace( CURSOR_CHAR, '' );
+            var value = this.inputBox.value.replace( /[，。；（）]/g, function ( match ) {
+                return CHARS[ match ];
+            } );
+
+            var tmp = this.kfEditor.triggerInputEvent( value );
+            if ( tmp ) {
+                value = tmp;
+            }
+
+            this.restruct( value );
+            this.latexInput.value = value.replace( CURSOR_CHAR, '' ).replace( CURSOR_CHAR, '' );
             this.kfEditor.requestService( "ui.update.canvas.view" );
 
         },
