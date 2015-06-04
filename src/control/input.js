@@ -275,7 +275,7 @@ define( function ( require, exports, module ) {
 
                 // ctrl + S
                 case 83:
-                    this.kfEditor.requestService( "print.image" );
+                    //this.kfEditor.requestService( "print.image" );
                     break;
 
             }
