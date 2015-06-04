@@ -135,7 +135,7 @@ define( function ( require, exports, module ) {
 
                 var isControl = false;
 
-                if ( e.ctrlKey ) {
+                if ( e.ctrlKey || e.metaKey ) {
                     // 处理用户控制行为
                     _self.processUserCtrl( e );
                     return;
