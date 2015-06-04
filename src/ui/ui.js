@@ -4,6 +4,9 @@
 
 define( function ( require ) {
 
+    var MAX_BIG_HISTORY = 3;
+    var MAX_SMALL_HISTORY = 20;
+
     var kity = require( "kity"),
 
         // UiUitls
@@ -23,15 +26,18 @@ define( function ( require ) {
 
         UIComponent = kity.createClass( 'UIComponent', {
 
+            bigNodes: [],
+            smallNodes: [],
+
+            disabled: false,
+            historyInited: false,
+
             constructor: function ( kfEditor, options ) {
-
-                var currentDocument = null;
-
                 this.options = options;
 
                 this.container = kfEditor.getContainer();
 
-                currentDocument = this.container.ownerDocument;
+                var currentDocument = this.container.ownerDocument;
 
                 // ui组件实例集合
                 this.components = {};
@@ -44,6 +50,7 @@ define( function ( require ) {
                 this.toolbarWrap = createToolbarWrap( currentDocument );
                 this.toolbarContainer = createToolbarContainer( currentDocument );
                 this.editArea = createEditArea( currentDocument );
+                this.historyArea = createHistoryArea( currentDocument );
                 this.canvasContainer = createCanvasContainer( currentDocument );
                 this.scrollbarContainer = createScrollbarContainer( currentDocument );
 
@@ -60,6 +67,11 @@ define( function ( require ) {
                 this.initEvent();
 
                 this.updateContainerSize( this.container, this.toolbarWrap, this.editArea, this.canvasContainer );
+
+                this.toolbarWrap.appendChild(this.historyArea);
+
+                this.bigHistory = $(".kf-big-history", this.historyArea);
+                this.smallHistory = $(".kf-small-history", this.historyArea);
 
                 this.initScrollEvent();
 
@@ -83,14 +95,92 @@ define( function ( require ) {
 
             },
 
+            addBigHistory: function (node) {
+                this.checkHistoryInit();
+
+                var index = this.bigNodes.indexOf(node);
+                var childs = this.bigHistory.children();
+
+                if (index !== -1) {
+                    this.bigNodes.splice(index, 1);
+                    this.bigNodes.unshift(node);
+
+                    node = childs[index];
+
+                    node.remove();
+                    $(this.bigHistory).prepend(node);
+                    return;
+                }
+
+                this.bigNodes.unshift(node);
+
+                if (childs.length >= MAX_BIG_HISTORY) {
+                    childs[childs.length - 1].remove();
+                    this.bigNodes.pop();
+                }
+
+                $(this.bigHistory).prepend(node.outerHTML);
+            },
+
+            addSmallHistory: function (node) {
+                this.checkHistoryInit();
+
+                var val = node.getAttribute('data-value');
+                var index = this.smallNodes.indexOf(val);
+                var childs = this.smallHistory.children();
+
+                if (index !== -1) {
+                    this.smallNodes.splice(index, 1);
+                    this.smallNodes.unshift(val);
+
+                    node = childs[index];
+
+                    node.remove();
+                    this.smallHistory.prepend(node);
+                    return;
+                }
+
+                this.smallNodes.unshift(val);
+
+                if (childs.length >= MAX_SMALL_HISTORY) {
+                    childs[childs.length - 1].remove();
+                    this.smallNodes.pop();
+                }
+
+                $(this.smallHistory).prepend(node.outerHTML);
+            },
+
+            checkHistoryInit: function () {
+                if (this.historyInited) {
+                    return;
+                }
+
+                this.historyInited = true;
+            },
+
+            addSmallCopyHistory: function (node) {
+                var index = +node.getAttribute('index');
+                this.addSmallHistory($(".kf-editor-ui-area-item")[index]);
+            },
+
             updateContainerSize: function ( container, toolbar, editArea ) {
 
                 var containerBox = container.getBoundingClientRect(),
                     toolbarBox = toolbar.getBoundingClientRect();
 
                 editArea.style.width = containerBox.width + "px";
-                editArea.style.height = containerBox.bottom - toolbarBox.bottom + "px";
+                editArea.style.height = containerBox.bottom - 100 - toolbarBox.bottom + "px";
 
+            },
+
+            disableHistory: function () {
+                $(this.historyArea).addClass('b-disabled');
+                this.disabled = true;
+            },
+
+            enableHistory: function () {
+                $(this.historyArea).removeClass('b-disabled');
+                this.disabled = false;
             },
 
             // 初始化服务
@@ -98,6 +188,14 @@ define( function ( require ) {
 
                 this.kfEditor.registerService( "ui.get.canvas.container", this, {
                     getCanvasContainer: this.getCanvasContainer
+                } );
+
+                this.kfEditor.registerService( "ui.add.big.history", this, {
+                    addBigHistory: this.addBigHistory
+                } );
+
+                this.kfEditor.registerService( "ui.add.small.history", this, {
+                    addSmallHistory: this.addSmallHistory
                 } );
 
                 this.kfEditor.registerService( "ui.update.canvas.view", this, {
@@ -114,10 +212,37 @@ define( function ( require ) {
             },
 
             initEvent: function () {
+                var _self = this;
 
-//                Utils.addEvent( this.container, 'mousewheel', function ( e ) {
-//                    e.preventDefault();
-//                } );
+                $$.subscribe("small.icon.click", function (node) {
+                    _self.addSmallHistory(node);
+                });
+
+                $$.subscribe("big.icon.click", function (node) {
+                    _self.addBigHistory(node);
+                });
+
+                $$.subscribe("small.icon.copy.click", function (node) {
+                    _self.addSmallCopyHistory(node);
+                });
+
+                $$.subscribe("disable.history", function () {
+                    _self.disableHistory();
+                });
+
+                $$.subscribe("enable.history", function () {
+                    _self.enableHistory();
+                });
+
+                $(this.historyArea).delegate(".kf-editor-ui-box-item, .kf-editor-ui-area-item", "mousedown", function (e) {
+                    e.preventDefault();
+
+                    if (_self.disabled) {
+                        return;
+                    }
+
+                    $$.publish("data.select", this.getAttribute("data-value"));
+                });
 
             },
 
@@ -219,6 +344,17 @@ define( function ( require ) {
         } );
 
     }
+
+    function createHistoryArea ( doc ) {
+        var node = $$.ele( doc, "div", {
+            className: "kf-editor-history"
+        } );
+
+        node.innerHTML = '<div class="kf-big-history"></div><div class="kf-small-history"></div>';
+
+        return node;
+    }
+
 
     function createEditArea ( doc ) {
         var container = doc.createElement( "div" );

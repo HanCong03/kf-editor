@@ -24,6 +24,14 @@ define( function ( require ) {
             if ( options.content ) {
                 node.innerHTML = options.content;
             }
+
+            if (options.attr) {
+                for (var key in options.attr) {
+                    if (options.attr.hasOwnProperty(key)) {
+                        node.setAttribute(key, options.attr[key]);
+                    }
+                }
+            }
             return node;
         },
 
