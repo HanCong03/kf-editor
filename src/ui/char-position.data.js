@@ -1436,6 +1436,25 @@ define( function () {
         "\\mathrm{z}": {
             "x": 1004,
             "y": 407
+        },
+
+        // ext
+
+        "\\angle": {
+            x: 0,
+            y: 0
+        },
+        "\\triangle": {
+            x: 37,
+            y: 0
+        },
+        "\\bot": {
+            x: 74,
+            y: 0
+        },
+        "\\parallel": {
+            x: 111,
+            y: 0
         }
     };
 

@@ -2,15 +2,15 @@
  * toolbar元素列表定义
  */
 
-define( function ( require ) {
+define(function (require) {
 
-    var UI_ELE_TYPE = require( "ui/ui-impl/def/ele-type" ),
-        BOX_TYPE = require( "ui/ui-impl/def/box-type" ),
-        CHAR_POSITION = require( "ui/char-position.data" ),
-        OTHER_POSITION = require( "ui/other-position.data" ),
-        kity = require( "kity" );
+    var UI_ELE_TYPE = require("ui/ui-impl/def/ele-type"),
+        BOX_TYPE = require("ui/ui-impl/def/box-type"),
+        CHAR_POSITION = require("ui/char-position.data"),
+        OTHER_POSITION = require("ui/other-position.data"),
+        kity = require("kity");
 
-    var config = [ {
+    var config = [{
         type: UI_ELE_TYPE.DRAPDOWN_BOX,
         options: {
             button: {
@@ -27,11 +27,11 @@ define( function ( require ) {
             },
             box: {
                 width: 367,
-                group: [ {
+                group: [{
                     title: "预设公式",
-                    items: [ {
+                    items: [{
                         title: "预设公式",
-                        content: [ {
+                        content: [{
                             label: "二次公式",
                             item: {
                                 val: "x=\\frac {-b\\pm\\sqrt {b^2-4ac}}{2a}"
@@ -46,9 +46,9 @@ define( function ( require ) {
                             item: {
                                 val: "a^2+b^2=c^2"
                             }
-                        } ]
-                    } ]
-                } ]
+                        }]
+                    }]
+                }]
             }
         }
     }, {
@@ -60,7 +60,7 @@ define( function ( require ) {
                 fixOffset: true,
                 width: 527,
                 type: BOX_TYPE.OVERLAP,
-                group: [ {
+                group: [{
                     title: "基础数学",
                     items: []
                 }, {
@@ -78,7 +78,7 @@ define( function ( require ) {
                 }, {
                     title: "手写体",
                     items: []
-                } ]
+                }]
             }
         }
     }, {
@@ -96,11 +96,11 @@ define( function ( require ) {
             },
             box: {
                 width: 332,
-                group: [ {
+                group: [{
                     title: "分数",
-                    items: [ {
+                    items: [{
                         title: "分数",
-                        content: [ {
+                        content: [{
                             item: {
                                 val: "\\frac \\placeholder\\placeholder"
                             }
@@ -108,10 +108,10 @@ define( function ( require ) {
                             item: {
                                 val: "{\\placeholder/\\placeholder}"
                             }
-                        } ]
+                        }]
                     }, {
                         title: "常用分数",
-                        content: [ {
+                        content: [{
                             item: {
                                 val: "\\frac {dy}{dx}"
                             }
@@ -127,9 +127,9 @@ define( function ( require ) {
                             item: {
                                 val: "\\frac \\pi 2"
                             }
-                        } ]
-                    } ]
-                } ]
+                        }]
+                    }]
+                }]
             }
         }
     }, {
@@ -145,11 +145,11 @@ define( function ( require ) {
             },
             box: {
                 width: 332,
-                group: [ {
+                group: [{
                     title: "上标和下标",
-                    items: [ {
+                    items: [{
                         title: "上标和下标",
-                        content: [ {
+                        content: [{
                             item: {
                                 val: "\\placeholder^\\placeholder"
                             }
@@ -165,10 +165,10 @@ define( function ( require ) {
                             item: {
                                 val: "{^\\placeholder_\\placeholder\\placeholder}"
                             }
-                        } ]
+                        }]
                     }, {
                         title: "常用的上标和下标",
-                        content: [ {
+                        content: [{
                             item: {
                                 val: "e^{-i\\omega t}"
                             }
@@ -180,9 +180,9 @@ define( function ( require ) {
                             item: {
                                 val: "{}^n_1Y"
                             }
-                        } ]
-                    } ]
-                } ]
+                        }]
+                    }]
+                }]
             }
         }
     }, {
@@ -198,11 +198,11 @@ define( function ( require ) {
             },
             box: {
                 width: 342,
-                group: [ {
+                group: [{
                     title: "根式",
-                    items: [ {
+                    items: [{
                         title: "根式",
-                        content: [ {
+                        content: [{
                             item: {
                                 val: "\\sqrt \\placeholder"
                             }
@@ -218,10 +218,10 @@ define( function ( require ) {
                             item: {
                                 val: "\\sqrt [3] \\placeholder"
                             }
-                        } ]
+                        }]
                     }, {
                         title: "常用根式",
-                        content: [ {
+                        content: [{
                             item: {
                                 val: "\\frac {-b\\pm\\sqrt{b^2-4ac}}{2a}"
                             }
@@ -229,9 +229,9 @@ define( function ( require ) {
                             item: {
                                 val: "\\sqrt {a^2+b^2}"
                             }
-                        } ]
-                    } ]
-                } ]
+                        }]
+                    }]
+                }]
             }
         }
     }, {
@@ -247,11 +247,11 @@ define( function ( require ) {
             },
             box: {
                 width: 332,
-                group: [ {
+                group: [{
                     title: "积分",
-                    items: [ {
+                    items: [{
                         title: "积分",
-                        content: [ {
+                        content: [{
                             item: {
                                 val: "\\int \\placeholder"
                             }
@@ -275,9 +275,9 @@ define( function ( require ) {
                             item: {
                                 val: "\\iiint^\\placeholder_\\placeholder\\placeholder"
                             }
-                        } ]
-                    } ]
-                } ]
+                        }]
+                    }]
+                }]
             }
         }
     }, {
@@ -293,11 +293,11 @@ define( function ( require ) {
             },
             box: {
                 width: 332,
-                group: [ {
+                group: [{
                     title: "求和",
-                    items: [ {
+                    items: [{
                         title: "求和",
-                        content: [ {
+                        content: [{
                             item: {
                                 val: "\\sum\\placeholder"
                             }
@@ -309,9 +309,9 @@ define( function ( require ) {
                             item: {
                                 val: "\\sum_\\placeholder\\placeholder"
                             }
-                        } ]
-                    } ]
-                } ]
+                        }]
+                    }]
+                }]
             }
         }
     }, {
@@ -327,11 +327,11 @@ define( function ( require ) {
             },
             box: {
                 width: 332,
-                group: [ {
+                group: [{
                     title: "方括号",
-                    items: [ {
+                    items: [{
                         title: "方括号",
-                        content: [ {
+                        content: [{
                             item: {
                                 val: "\\left(\\placeholder\\right)"
                             }
@@ -347,9 +347,9 @@ define( function ( require ) {
                             item: {
                                 val: "\\left|\\placeholder\\right|"
                             }
-                        } ]
-                    } ]
-                } ]
+                        }]
+                    }]
+                }]
             }
         }
     }, {
@@ -365,11 +365,11 @@ define( function ( require ) {
             },
             box: {
                 width: 340,
-                group: [ {
+                group: [{
                     title: "函数",
-                    items: [ {
+                    items: [{
                         title: "三角函数",
-                        content: [ {
+                        content: [{
                             item: {
                                 val: "\\sin\\placeholder"
                             }
@@ -393,10 +393,10 @@ define( function ( require ) {
                             item: {
                                 val: "\\cot\\placeholder"
                             }
-                        } ]
+                        }]
                     }, {
                         title: "常用函数",
-                        content: [ {
+                        content: [{
                             item: {
                                 val: "\\sin\\theta"
                             }
@@ -408,48 +408,48 @@ define( function ( require ) {
                             item: {
                                 val: "\\tan\\theta=\\frac {\\sin\\theta}{\\cos\\theta}"
                             }
-                        } ]
-                    } ]
-                } ]
+                        }]
+                    }]
+                }]
             }
         }
-    } ];
+    }];
 
     //--------------------------------------------- 初始化特殊字符区域以外的配置项
-    ( function () {
+    (function () {
 
         var tmp = [],
             otherImageSrc = "assets/images/toolbar/other.png",
             currentConf = [];
 
-        kity.Utils.each( config, function ( conf ) {
+        kity.Utils.each(config, function (conf) {
 
-            if ( conf.type === UI_ELE_TYPE.DELIMITER ) {
+            if (conf.type === UI_ELE_TYPE.DELIMITER) {
                 return;
             }
 
             conf = conf.options.box.group;
 
-            tmp = tmp.concat( conf );
+            tmp = tmp.concat(conf);
 
-        } );
+        });
 
-        kity.Utils.each( tmp, function ( conf ) {
+        kity.Utils.each(tmp, function (conf) {
 
             conf = conf.items;
 
-            for ( var i = 0, len = conf.length; i < len; i++ ) {
-                currentConf = currentConf.concat( conf[ i ].content );
+            for (var i = 0, len = conf.length; i < len; i++) {
+                currentConf = currentConf.concat(conf[i].content);
             }
 
-        } );
+        });
 
         // 添加定位信息
-        kity.Utils.each( currentConf, function ( conf ) {
+        kity.Utils.each(currentConf, function (conf) {
 
-            var data = OTHER_POSITION[ conf.item.val ];
+            var data = OTHER_POSITION[conf.item.val];
 
-            if ( !data ) {
+            if (!data) {
                 return;
             }
 
@@ -457,13 +457,13 @@ define( function ( require ) {
             conf.item.pos = data.pos;
             conf.item.size = data.size;
 
-        } );
+        });
 
-    } )();
+    })();
 
     //--------------------------------------------- 初始化特殊字符区域
     // 基础数学
-    ( function () {
+    (function () {
 
         var list = [
                 "pm", "infty", "=", "sim", "times", "div", "!", "<", "ll", ">",
@@ -471,58 +471,60 @@ define( function ( require ) {
                 "forall", "partial", "surd", "cup", "cap", "varnothing", "%",
                 "circ", "exists", "nexists", "in", "ni", "gets", "uparrow",
                 "to", "downarrow", "leftrightarrow", "therefore", "because",
-                "+", "-", "neg", "ast", "cdot", "vdots",/* "ddots",*/ "aleph",
-                "beth", "blacksquare"
-
+                "+", "-", "neg", "ast", "cdot", "vdots", /* "ddots",*/ "aleph",
+                "beth", "blacksquare", "angle", "triangle", "bot", "parallel"
             ],
-            configList = config[ 2 ].options.box.group[ 0 ].items;
+            listX = [
+                "angle", "triangle", "bot", "parallel"
+            ],
+            configList = config[2].options.box.group[0].items;
 
-        configList.push( {
+        configList.push({
             title: "基础数学",
-            content: getIconContents( list, "assets/images/toolbar/char.png" )
-        } );
+            content: getIconContents(list, "assets/images/toolbar/char.png").concat(getIconContents(listX, "assets/images/toolbar/char-x.png"))
+        });
 
-    } )();
+    })();
 
     // 希腊字符配置
-    ( function () {
+    (function () {
 
-        var greekList = [ {
+        var greekList = [{
                 title: "小写",
-                values: [ "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega" ]
+                values: ["alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega"]
             }, {
                 title: "大写",
-                values: [ "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta", "Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho", "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega" ]
+                values: ["Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta", "Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho", "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega"]
             }, {
                 title: "变体",
-                values: [ "digamma", "varepsilon", "varkappa", "varphi", "varpi", "varrho", "varsigma", "vartheta" ]
-            } ],
-            greekConfigList = config[ 2 ].options.box.group[ 1 ].items;
+                values: ["digamma", "varepsilon", "varkappa", "varphi", "varpi", "varrho", "varsigma", "vartheta"]
+            }],
+            greekConfigList = config[2].options.box.group[1].items;
 
         // 小写处理
-        greekConfigList.push( {
-            title: greekList[ 0 ].title,
-            content: getIconContents( greekList[ 0 ].values, "assets/images/toolbar/char.png" )
-        } );
+        greekConfigList.push({
+            title: greekList[0].title,
+            content: getIconContents(greekList[0].values, "assets/images/toolbar/char.png")
+        });
 
         // 大写处理
-        greekConfigList.push( {
-            title: greekList[ 1 ].title,
-            content: getIconContents( greekList[ 1 ].values, "assets/images/toolbar/char.png" )
-        } );
+        greekConfigList.push({
+            title: greekList[1].title,
+            content: getIconContents(greekList[1].values, "assets/images/toolbar/char.png")
+        });
 
         // 变体处理
-        greekConfigList.push( {
-            title: greekList[ 2 ].title,
-            content: getIconContents( greekList[ 2 ].values, "assets/images/toolbar/char.png" )
-        } );
+        greekConfigList.push({
+            title: greekList[2].title,
+            content: getIconContents(greekList[2].values, "assets/images/toolbar/char.png")
+        });
 
-    } )();
+    })();
 
     // 求反运算符
-    ( function () {
+    (function () {
 
-        var greekList = [ {
+        var greekList = [{
                 title: "求反关系运算符",
                 values: [
                     "neq", "nless", "ngtr", "nleq", "ngeq", "nsim", "lneqq",
@@ -532,35 +534,35 @@ define( function ( require ) {
                     "ntrianglerighteq", "nmid", "nparallel", "nvdash", "nVdash",
                     "nvDash", "nVDash", "nexists"
                 ]
-            } ],
-            greekConfigList = config[ 2 ].options.box.group[ 2 ].items;
+            }],
+            greekConfigList = config[2].options.box.group[2].items;
 
-        greekConfigList.push( {
-            title: greekList[ 0 ].title,
-            content: getIconContents( greekList[ 0 ].values, "assets/images/toolbar/char.png" )
-        } );
+        greekConfigList.push({
+            title: greekList[0].title,
+            content: getIconContents(greekList[0].values, "assets/images/toolbar/char.png")
+        });
 
-    } )();
+    })();
 
     // 字母类符号
-    ( function () {
+    (function () {
 
         var list = [
                 "aleph", "beth", "daleth", "gimel", "complement", "ell", "eth", "hbar",
                 "hslash", "mho", "partial", "wp", "circledS", "Bbbk", "Finv", "Game",
                 "Im", "Re"
             ],
-            configList = config[ 2 ].options.box.group[ 3 ].items;
+            configList = config[2].options.box.group[3].items;
 
-        configList.push( {
+        configList.push({
             title: "字母类符号",
-            content: getIconContents( list, "assets/images/toolbar/char.png" )
-        } );
+            content: getIconContents(list, "assets/images/toolbar/char.png")
+        });
 
-    } )();
+    })();
 
     // 化箭头
-    ( function () {
+    (function () {
 
         var list = [
                 "gets", "to", "uparrow", "downarrow", "leftrightarrow", "updownarrow",
@@ -578,24 +580,24 @@ define( function ( require ) {
                 "curvearrowright", "circlearrowleft", "circlearrowright", "multimap",
                 "leftrightsquigarrow", "twoheadleftarrow", "twoheadrightarrow", "rightsquigarrow"
             ],
-            configList = config[ 2 ].options.box.group[ 4 ].items;
+            configList = config[2].options.box.group[4].items;
 
-        configList.push( {
+        configList.push({
             title: "箭头",
-            content: getIconContents( list, "assets/images/toolbar/char.png" )
-        } );
+            content: getIconContents(list, "assets/images/toolbar/char.png")
+        });
 
-    } )();
+    })();
 
     // 手写体
-    ( function () {
+    (function () {
 
-        var list = [ {
+        var list = [{
                 title: "手写体",
                 values: [
                     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
                     "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X",
-                    "Y", "Z" ]
+                    "Y", "Z"]
             }, {
                 title: "花体",
                 values: [
@@ -621,73 +623,73 @@ define( function ( require ) {
                     "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v",
                     "w", "x", "y", "z"
                 ]
-            } ],
-            configList = config[ 2 ].options.box.group[ 5 ].items;
+            }],
+            configList = config[2].options.box.group[5].items;
 
-        kity.Utils.each( list[ 0 ].values, function ( item, index ) {
+        kity.Utils.each(list[0].values, function (item, index) {
 
-            list[ 0 ].values[ index ] = "mathcal{" + item + "}";
+            list[0].values[index] = "mathcal{" + item + "}";
 
-        } );
+        });
 
-        kity.Utils.each( list[ 1 ].values, function ( item, index ) {
+        kity.Utils.each(list[1].values, function (item, index) {
 
-            list[ 1 ].values[ index ] = "mathfrak{" + item + "}";
+            list[1].values[index] = "mathfrak{" + item + "}";
 
-        } );
+        });
 
-        kity.Utils.each( list[ 2 ].values, function ( item, index ) {
+        kity.Utils.each(list[2].values, function (item, index) {
 
-            list[ 2 ].values[ index ] = "mathbb{" + item + "}";
+            list[2].values[index] = "mathbb{" + item + "}";
 
-        } );
+        });
 
-        kity.Utils.each( list[ 3 ].values, function ( item, index ) {
+        kity.Utils.each(list[3].values, function (item, index) {
 
-            list[ 3 ].values[ index ] = "mathrm{" + item + "}";
+            list[3].values[index] = "mathrm{" + item + "}";
 
-        } );
+        });
 
         // 手写体
-        configList.push( {
-            title: list[ 0 ].title,
-            content: getIconContents( list[ 0 ].values, "assets/images/toolbar/char.png" )
-        } );
+        configList.push({
+            title: list[0].title,
+            content: getIconContents(list[0].values, "assets/images/toolbar/char.png")
+        });
 
-        configList.push( {
-            title: list[ 1 ].title,
-            content: getIconContents( list[ 1 ].values, "assets/images/toolbar/char.png" )
-        } );
+        configList.push({
+            title: list[1].title,
+            content: getIconContents(list[1].values, "assets/images/toolbar/char.png")
+        });
 
-        configList.push( {
-            title: list[ 2 ].title,
-            content: getIconContents( list[ 2 ].values, "assets/images/toolbar/char.png" )
-        } );
+        configList.push({
+            title: list[2].title,
+            content: getIconContents(list[2].values, "assets/images/toolbar/char.png")
+        });
 
-        configList.push( {
-            title: list[ 3 ].title,
-            content: getIconContents( list[ 3 ].values, "assets/images/toolbar/char.png" )
-        } );
+        configList.push({
+            title: list[3].title,
+            content: getIconContents(list[3].values, "assets/images/toolbar/char.png")
+        });
 
-    } )();
+    })();
 
-    function getIconContents ( keySet, imgSrc ) {
+    function getIconContents(keySet, imgSrc) {
 
         var result = [];
 
-        kity.Utils.each( keySet, function ( key ) {
+        kity.Utils.each(keySet, function (key) {
 
-            if ( key.length > 1 ) {
+            if (key.length > 1) {
                 key = "\\" + key;
             }
 
-            result.push( {
+            result.push({
                 key: key,
                 img: imgSrc,
-                pos: CHAR_POSITION[ key ]
-            } );
+                pos: CHAR_POSITION[key]
+            });
 
-        } );
+        });
 
         return result;
 
@@ -695,4 +697,4 @@ define( function ( require ) {
 
     return config;
 
-} );
+});
