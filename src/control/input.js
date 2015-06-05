@@ -264,12 +264,11 @@ define( function ( require, exports, module ) {
 
         processUserCtrl: function ( e ) {
 
-            e.preventDefault();
-
             switch ( e.keyCode ) {
 
                 // ctrl + A
                 case 65:
+                    e.preventDefault();
                     this.kfEditor.requestService( "control.select.all" );
                     break;
 
