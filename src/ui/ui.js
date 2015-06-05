@@ -7,10 +7,11 @@ define(function (require) {
     var MAX_BIG_HISTORY = 3;
     var MAX_SMALL_HISTORY = 20;
 
+    var GUtils = require("ui/ui-impl/ui-utils");
+
     var kity = require("kity"),
 
-    // UiUitls
-        $$ = require("ui/ui-impl/ui-utils"),
+        $ = require("jquery"),
 
         Utils = require("base/utils"),
 
@@ -217,23 +218,23 @@ define(function (require) {
             initEvent: function () {
                 var _self = this;
 
-                $$.subscribe("small.icon.click", function (node) {
+                GUtils.subscribe("small.icon.click", function (node) {
                     _self.addSmallHistory(node);
                 });
 
-                $$.subscribe("big.icon.click", function (node) {
+                GUtils.subscribe("big.icon.click", function (node) {
                     _self.addBigHistory(node);
                 });
 
-                $$.subscribe("small.icon.copy.click", function (node) {
+                GUtils.subscribe("small.icon.copy.click", function (node) {
                     _self.addSmallCopyHistory(node);
                 });
 
-                $$.subscribe("disable.history", function () {
+                GUtils.subscribe("disable.history", function () {
                     _self.disableHistory();
                 });
 
-                $$.subscribe("enable.history", function () {
+                GUtils.subscribe("enable.history", function () {
                     _self.enableHistory();
                 });
 
@@ -244,7 +245,7 @@ define(function (require) {
                         return;
                     }
 
-                    $$.publish("data.select", this.getAttribute("data-value"));
+                    GUtils.publish("data.select", this.getAttribute("data-value"));
                 });
 
             },
@@ -334,23 +335,21 @@ define(function (require) {
         });
 
     function createToolbarWrap(doc) {
-
-        return $$.ele(doc, "div", {
+        return GUtils.ele(doc, "div", {
             className: "kf-editor-toolbar"
         });
-
     }
 
     function createToolbarContainer(doc) {
 
-        return $$.ele(doc, "div", {
+        return GUtils.ele(doc, "div", {
             className: "kf-editor-inner-toolbar"
         });
 
     }
 
     function createHistoryArea(doc) {
-        var node = $$.ele(doc, "div", {
+        var node = GUtils.ele(doc, "div", {
             className: "kf-editor-history"
         });
 

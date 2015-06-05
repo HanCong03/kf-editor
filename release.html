@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="dev-lib/jquery-1.11.0.min.js"></script>
+    <script src="dev-lib/kitygraph.all.js"></script>
+    <script src="dev-lib/kity-formula-render.all.js"></script>
+    <script src="dev-lib/kity-formula-parser.all.min.js"></script>
+    <script src="dist/kityformula-editor.all.min.js"></script>
+
+    <link rel="stylesheet" href="assets/styles/page.css">
+    <link rel="stylesheet" href="assets/styles/base.css">
+    <link rel="stylesheet" href="assets/styles/ui.css">
+    <link rel="stylesheet" href="assets/styles/scrollbar.css">
+
+    <script>
+        jQuery( function ($) {
+
+            var factory = kf.EditorFactory.create( $( "#kfEditorContainer" )[ 0 ], {
+                render: {
+                    fontsize: 40,
+                    padding: [0]
+                },
+                resource: {
+                    path: "resource/"
+                }
+            } );
+
+            factory.ready( function ( KFEditor ) {
+
+                // this指向KFEditor
+                this.execCommand( "render", "\\placeholder" );
+                this.execCommand( "focus" );
+
+                window.kfe = this;
+
+            } );
+
+            document.onkeydown = function (e) {
+                if ((e.metaKey || e.ctrlKey )&& e.keyCode === 83) {
+                    e.preventDefault();
+                    kfe.execCommand('get.image.data', function (data) {
+                        console.log(data.img)
+                    });
+                }
+            };
+        } );
+    </script>
+</head>
+<body>
+<div id="kfEditorContainer" class="kf-editor" style="width: 900px; height: 502px; position: absolute; top: 20px; left: 50px;"></div>
+</body>
+</html>

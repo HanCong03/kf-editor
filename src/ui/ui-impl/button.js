@@ -18,7 +18,7 @@ define( function ( require ) {
         },
 
         // UiUitls
-        $$ = require( "ui/ui-impl/ui-utils" ),
+        GUtils = require( "ui/ui-impl/ui-utils" ),
 
         Button = kity.createClass( "Button", {
 
@@ -59,7 +59,7 @@ define( function ( require ) {
 
                 this.eventState = true;
 
-                $$.on( this.element, "mousedown", function ( e ) {
+                GUtils.on( this.element, "mousedown", function ( e ) {
 
                     e.preventDefault();
                     e.stopPropagation();
@@ -102,15 +102,15 @@ define( function ( require ) {
             },
 
             toggleSelect: function () {
-                $$.getClassList( this.element ).toggle( PREFIX + "button-in" );
+                GUtils.getClassList( this.element ).toggle( PREFIX + "button-in" );
             },
 
             unselect: function () {
-                $$.getClassList( this.element ).remove( PREFIX + "button-in" );
+                GUtils.getClassList( this.element ).remove( PREFIX + "button-in" );
             },
 
             select: function () {
-                $$.getClassList( this.element ).add( PREFIX + "button-in" );
+                GUtils.getClassList( this.element ).add( PREFIX + "button-in" );
             },
 
             show: function () {
@@ -137,12 +137,12 @@ define( function ( require ) {
 
                 var editorContainer = this.toolbar.getContainer(),
                     currentBox = null,
-                    containerBox = $$.getRectBox( editorContainer ),
+                    containerBox = GUtils.getRectBox( editorContainer ),
                     mountEleBox = this.mountElement.getPositionInfo();
 
                 // 修正偏移
                 if ( mountEleBox.right > containerBox.right ) {
-                    currentBox = $$.getRectBox( this.element );
+                    currentBox = GUtils.getRectBox( this.element );
                     // 对齐到按钮的右边界
                     this.mountPoint.style.left = currentBox.right - mountEleBox.right - 1 + "px";
                 }
@@ -167,7 +167,7 @@ define( function ( require ) {
 
             createButton: function () {
 
-                var buttonNode = $$.ele( this.doc, "div", {
+                var buttonNode = GUtils.ele( this.doc, "div", {
                     className: PREFIX + "button"
                 } );
 
@@ -186,7 +186,7 @@ define( function ( require ) {
                     return null;
                 }
 
-                var iconNode = $$.ele( this.doc, "div", {
+                var iconNode = GUtils.ele( this.doc, "div", {
                     className: PREFIX + "button-icon"
                 } );
 
@@ -210,7 +210,7 @@ define( function ( require ) {
 
             createLabel: function () {
 
-                var labelNode = $$.ele( this.doc, "div", {
+                var labelNode = GUtils.ele( this.doc, "div", {
                     className: PREFIX + "button-label",
                     content: this.options.label
                 } );
@@ -226,7 +226,7 @@ define( function ( require ) {
                     return null;
                 }
 
-                return $$.ele( this.doc, "div", {
+                return GUtils.ele( this.doc, "div", {
                     className: PREFIX + "button-sign"
                 } );
 
@@ -234,7 +234,7 @@ define( function ( require ) {
 
             createMountPoint: function () {
 
-                return $$.ele( this.doc, "div", {
+                return GUtils.ele( this.doc, "div", {
                     className: PREFIX + "button-mount-point"
                 } );
 
@@ -242,12 +242,12 @@ define( function ( require ) {
 
             disable: function () {
                 this.disabled = true;
-                $$.getClassList( this.element ).remove( PREFIX + "enabled" );
+                GUtils.getClassList( this.element ).remove( PREFIX + "enabled" );
             },
 
             enable: function () {
                 this.disabled = false;
-                $$.getClassList( this.element ).add( PREFIX + "enabled" );
+                GUtils.getClassList( this.element ).add( PREFIX + "enabled" );
             },
 
             mergeElement: function () {

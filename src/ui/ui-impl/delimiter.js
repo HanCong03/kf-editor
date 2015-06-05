@@ -9,7 +9,7 @@ define( function ( require ) {
         PREFIX = "kf-editor-ui-",
 
         // UiUitls
-        $$ = require( "ui/ui-impl/ui-utils" ),
+        GUtils = require( "ui/ui-impl/ui-utils" ),
 
         Delimiter = kity.createClass( "Delimiter", {
 
@@ -26,11 +26,11 @@ define( function ( require ) {
 
             createDilimiter: function () {
 
-                var dilimiterNode = $$.ele( this.doc, "div", {
+                var dilimiterNode = GUtils.ele( this.doc, "div", {
                     className: PREFIX + "delimiter"
                 } );
 
-                dilimiterNode.appendChild( $$.ele( this.doc, "div", {
+                dilimiterNode.appendChild( GUtils.ele( this.doc, "div", {
                     className: PREFIX + "delimiter-line"
                 } ) );
 

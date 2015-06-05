@@ -6,8 +6,9 @@ define(function (require) {
 
     var kity = require("kity"),
 
+        $ = require('jquery'),
     // UiUitls
-        $$ = require("ui/ui-impl/ui-utils"),
+        GUtils = require("ui/ui-impl/ui-utils"),
 
         Button = require("ui/ui-impl/button"),
         Box = require("ui/ui-impl/box"),
@@ -37,7 +38,7 @@ define(function (require) {
                 var _self = this;
 
                 // 通知工具栏互斥
-                $$.on(this.element, "mousedown", function (e) {
+                GUtils.on(this.element, "mousedown", function (e) {
 
                     e.preventDefault();
                     e.stopPropagation();
@@ -52,9 +53,9 @@ define(function (require) {
 
                 this.boxElement.setSelectHandler(function (val, node) {
                     // 发布
-                    $$.publish("data.select", val);
+                    GUtils.publish("data.select", val);
                     if ($(".kf-editor-ui-box-item-label", node).length === 0) {
-                        $$.publish("big.icon.click", node);
+                        GUtils.publish("big.icon.click", node);
                     }
                     _self.buttonElement.hide();
                 });

@@ -9,7 +9,7 @@ define(function (require) {
         PREFIX = "kf-editor-ui-",
 
     // UiUitls
-        $$ = require("ui/ui-impl/ui-utils"),
+        GUtils = require("ui/ui-impl/ui-utils"),
 
         BOX_TYPE = require("ui/ui-impl/def/box-type"),
 
@@ -45,7 +45,7 @@ define(function (require) {
 
             createBox: function () {
 
-                var boxNode = $$.ele(this.doc, "div", {
+                var boxNode = GUtils.ele(this.doc, "div", {
                     className: PREFIX + "box"
                 });
 
@@ -66,9 +66,9 @@ define(function (require) {
 
             updateSize: function () {
 
-                var containerBox = $$.getRectBox(this.toolbar.getContainer()),
+                var containerBox = GUtils.getRectBox(this.toolbar.getContainer()),
                     diff = 30,
-                    curBox = $$.getRectBox(this.element);
+                    curBox = GUtils.getRectBox(this.element);
 
                 if (this.options.type === BOX_TYPE.DETACHED) {
 
@@ -103,7 +103,7 @@ define(function (require) {
                 var className = "." + PREFIX + "box-item",
                     _self = this;
 
-                $$.delegate(this.groupContainer, className, "mousedown", function (e) {
+                GUtils.delegate(this.groupContainer, className, "mousedown", function (e) {
 
                     e.preventDefault();
 
@@ -114,14 +114,14 @@ define(function (require) {
                     _self.onselectHandler && _self.onselectHandler(this.getAttribute("data-value"), this);
                 });
 
-                $$.on(this.element, "mousedown", function (e) {
+                GUtils.on(this.element, "mousedown", function (e) {
 
                     e.stopPropagation();
                     e.preventDefault();
 
                 });
 
-                $$.on(this.element, "mousewheel", function (e) {
+                GUtils.on(this.element, "mousewheel", function (e) {
 
                     e.preventDefault();
                     e.stopPropagation();
@@ -179,14 +179,14 @@ define(function (require) {
 
             createGroupContainer: function () {
 
-                return $$.ele(this.doc, "div", {
+                return GUtils.ele(this.doc, "div", {
                     className: PREFIX + "box-container"
                 });
 
             },
 
             getPositionInfo: function () {
-                return $$.getRectBox(this.element);
+                return GUtils.getRectBox(this.element);
             },
 
             createItemGroup: function () {
@@ -246,7 +246,7 @@ define(function (require) {
                         width: 150,
                         items: classifyList
                     }),
-                    wrapNode = $$.ele(this.doc, "div", {
+                    wrapNode = GUtils.ele(this.doc, "div", {
                         className: PREFIX + "wrap-group"
                     });
 
@@ -350,7 +350,7 @@ define(function (require) {
                     itemType = BOX_TYPE.DETACHED === this.options.type ? ITEM_TYPE.BIG : ITEM_TYPE.SMALL,
                     itemContainer = null;
 
-                groupNode = $$.ele(this.doc, "div", {
+                groupNode = GUtils.ele(this.doc, "div", {
                     className: PREFIX + "box-group"
                 });
 
@@ -369,7 +369,7 @@ define(function (require) {
                         groupNode = groupNode.cloneNode(false);
                         itemContainer = itemContainer.cloneNode(false);
 
-                        groupTitle = $$.ele(doc, "div", {
+                        groupTitle = GUtils.ele(doc, "div", {
                             className: PREFIX + "box-group-title",
                             content: item.title
                         });
@@ -446,7 +446,7 @@ define(function (require) {
 
             createItem: function () {
 
-                var itemNode = $$.ele(this.doc, "div", {
+                var itemNode = GUtils.ele(this.doc, "div", {
                     className: PREFIX + "box-item"
                 });
 
@@ -462,7 +462,7 @@ define(function (require) {
                     return;
                 }
 
-                labelNode = $$.ele(this.doc, "div", {
+                labelNode = GUtils.ele(this.doc, "div", {
                     className: PREFIX + "box-item-label",
                     content: this.options.label
                 });
@@ -491,7 +491,7 @@ define(function (require) {
             createBigContent: function () {
 
                 var doc = this.doc,
-                    contentNode = $$.ele(doc, "div", {
+                    contentNode = GUtils.ele(doc, "div", {
                         className: PREFIX + "box-item-content"
                     }),
                     cls = PREFIX + "box-item-val",
@@ -499,7 +499,7 @@ define(function (require) {
                     tmpNode = null,
                     styleStr = getStyleByData(tmpContent);
 
-                tmpNode = $$.ele(doc, "div", {
+                tmpNode = GUtils.ele(doc, "div", {
                     className: cls
                 });
 
@@ -516,14 +516,14 @@ define(function (require) {
             createSmallContent: function () {
 
                 var doc = this.doc,
-                    contentNode = $$.ele(doc, "div", {
+                    contentNode = GUtils.ele(doc, "div", {
                         className: PREFIX + "box-item-content"
                     }),
                     cls = PREFIX + "box-item-val",
                     tmpContent = this.options,
                     tmpNode = null;
 
-                tmpNode = $$.ele(doc, "div", {
+                tmpNode = GUtils.ele(doc, "div", {
                     className: cls
                 });
 
@@ -572,7 +572,7 @@ define(function (require) {
     // 为重叠式box创建容器
     function createOverlapContainer(doc) {
 
-        return $$.ele(doc, "div", {
+        return GUtils.ele(doc, "div", {
             className: PREFIX + "overlap-container"
         });
 

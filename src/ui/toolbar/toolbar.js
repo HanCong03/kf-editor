@@ -8,7 +8,7 @@ define(function (require) {
 
         UiImpl = require("ui/ui-impl/ui"),
 
-        $$ = require("ui/ui-impl/ui-utils"),
+        GUtils = require("ui/ui-impl/ui-utils"),
 
         UI_ELE_TYPE = require("ui/ui-impl/def/ele-type"),
 
@@ -52,21 +52,21 @@ define(function (require) {
 
                 var _self = this;
 
-                $$.on(this.uiComponent.toolbarContainer, "mousedown", function (e) {
+                GUtils.on(this.uiComponent.toolbarContainer, "mousedown", function (e) {
                     e.preventDefault();
                 });
 
-                $$.on(this.uiComponent.toolbarContainer, "mousewheel", function (e) {
+                GUtils.on(this.uiComponent.toolbarContainer, "mousewheel", function (e) {
                     e.preventDefault();
                 });
 
                 // 通知所有组件关闭
-                $$.on(this.kfEditor.getContainer(), "mousedown", function () {
+                GUtils.on(this.kfEditor.getContainer(), "mousedown", function () {
                     _self.notify("closeAll");
                 });
 
                 // 订阅数据选择主题
-                $$.subscribe("data.select", function (data) {
+                GUtils.subscribe("data.select", function (data) {
                     _self.insertSource(data);
                 });
             },
@@ -83,7 +83,7 @@ define(function (require) {
                     ele.disable && ele.disable();
                 });
 
-                $$.publish("disable.history");
+                GUtils.publish("disable.history");
             },
 
             enableToolbar: function () {
@@ -92,7 +92,7 @@ define(function (require) {
                     ele.enable && ele.enable();
                 });
 
-                $$.publish("enable.history");
+                GUtils.publish("enable.history");
             },
 
             getContainer: function () {

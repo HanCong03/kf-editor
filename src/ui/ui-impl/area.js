@@ -10,7 +10,7 @@ define(function (require) {
 
         PANEL_HEIGHT = 66,
     // UiUitls
-        $$ = require("ui/ui-impl/ui-utils"),
+        GUtils = require("ui/ui-impl/ui-utils"),
 
         Box = require("ui/ui-impl/box"),
 
@@ -51,7 +51,7 @@ define(function (require) {
 
                 var _self = this;
 
-                $$.on(this.button, "mousedown", function (e) {
+                GUtils.on(this.button, "mousedown", function (e) {
 
                     e.preventDefault();
                     e.stopPropagation();
@@ -65,7 +65,7 @@ define(function (require) {
 
                 });
 
-                $$.on(this.moveDownButton, "mousedown", function (e) {
+                GUtils.on(this.moveDownButton, "mousedown", function (e) {
 
                     e.preventDefault();
                     e.stopPropagation();
@@ -79,7 +79,7 @@ define(function (require) {
 
                 });
 
-                $$.on(this.moveUpButton, "mousedown", function (e) {
+                GUtils.on(this.moveUpButton, "mousedown", function (e) {
 
                     e.preventDefault();
                     e.stopPropagation();
@@ -93,7 +93,7 @@ define(function (require) {
 
                 });
 
-                $$.delegate(this.container, ".kf-editor-ui-area-item", "mousedown", function (e) {
+                GUtils.delegate(this.container, ".kf-editor-ui-area-item", "mousedown", function (e) {
 
                     e.preventDefault();
 
@@ -101,8 +101,8 @@ define(function (require) {
                         return;
                     }
 
-                    $$.publish("data.select", this.getAttribute("data-value"));
-                    $$.publish("small.icon.click", this);
+                    GUtils.publish("data.select", this.getAttribute("data-value"));
+                    GUtils.publish("small.icon.click", this);
                 });
 
                 this.boxObject.initEvent();
@@ -112,13 +112,13 @@ define(function (require) {
             disable: function () {
                 this.disabled = true;
                 this.boxObject.disable();
-                $$.getClassList(this.element).remove(PREFIX + "enabled");
+                GUtils.getClassList(this.element).remove(PREFIX + "enabled");
             },
 
             enable: function () {
                 this.disabled = false;
                 this.boxObject.enable();
-                $$.getClassList(this.element).add(PREFIX + "enabled");
+                GUtils.getClassList(this.element).add(PREFIX + "enabled");
             },
 
             setListener: function () {
@@ -127,8 +127,8 @@ define(function (require) {
 
                 this.boxObject.setSelectHandler(function (val, node) {
                     // 发布
-                    $$.publish("data.select", val);
-                    $$.publish("small.icon.copy.click", node)
+                    GUtils.publish("data.select", val);
+                    GUtils.publish("small.icon.copy.click", node);
                     _self.hide();
                 });
 
@@ -141,7 +141,7 @@ define(function (require) {
 
             createArea: function () {
 
-                var areaNode = $$.ele(this.doc, "div", {
+                var areaNode = GUtils.ele(this.doc, "div", {
                     className: PREFIX + "area"
                 });
 
@@ -224,7 +224,7 @@ define(function (require) {
 
             createButton: function () {
 
-                return $$.ele(this.doc, "div", {
+                return GUtils.ele(this.doc, "div", {
                     className: PREFIX + "area-button"
                 });
 
@@ -232,7 +232,7 @@ define(function (require) {
 
             createMoveDownButton: function () {
 
-                return $$.ele(this.doc, "div", {
+                return GUtils.ele(this.doc, "div", {
                     className: PREFIX + "movedown-button",
                     content: ""
                 });
@@ -241,7 +241,7 @@ define(function (require) {
 
             createMoveUpButton: function () {
 
-                return $$.ele(this.doc, "div", {
+                return GUtils.ele(this.doc, "div", {
                     className: PREFIX + "moveup-button",
                     content: ""
                 });
@@ -250,7 +250,7 @@ define(function (require) {
 
             createMountPoint: function () {
 
-                return $$.ele(this.doc, "div", {
+                return GUtils.ele(this.doc, "div", {
                     className: PREFIX + "area-mount"
                 });
 
@@ -264,7 +264,7 @@ define(function (require) {
 
             createContainer: function () {
 
-                return $$.ele(this.doc, "div", {
+                return GUtils.ele(this.doc, "div", {
                     className: PREFIX + "area-container"
                 });
 
@@ -272,14 +272,14 @@ define(function (require) {
 
             createPanel: function () {
 
-                return $$.ele(this.doc, "div", {
+                return GUtils.ele(this.doc, "div", {
                     className: PREFIX + "area-panel"
                 });
 
             },
 
             createButtonContainer: function () {
-                return $$.ele(this.doc, "div", {
+                return GUtils.ele(this.doc, "div", {
                     className: PREFIX + "area-button-container"
                 });
             },
@@ -300,22 +300,22 @@ define(function (require) {
 
             disablePanelUp: function () {
                 this.disabledUp = true;
-                $$.getClassList(this.moveUpButton).add("kf-editor-ui-disabled");
+                GUtils.getClassList(this.moveUpButton).add("kf-editor-ui-disabled");
             },
 
             enablePanelUp: function () {
                 this.disabledUp = false;
-                $$.getClassList(this.moveUpButton).remove("kf-editor-ui-disabled");
+                GUtils.getClassList(this.moveUpButton).remove("kf-editor-ui-disabled");
             },
 
             disablePanelDown: function () {
                 this.disabledDown = true;
-                $$.getClassList(this.moveDownButton).add("kf-editor-ui-disabled");
+                GUtils.getClassList(this.moveDownButton).add("kf-editor-ui-disabled");
             },
 
             enablePanelDown: function () {
                 this.disabledDown = false;
-                $$.getClassList(this.moveDownButton).remove("kf-editor-ui-disabled");
+                GUtils.getClassList(this.moveDownButton).remove("kf-editor-ui-disabled");
             },
 
             updatePanelButtonState: function () {

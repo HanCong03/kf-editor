@@ -9,7 +9,7 @@ define( function ( require ) {
         PREFIX = "kf-editor-ui-",
 
         // UiUitls
-        $$ = require( "ui/ui-impl/ui-utils" ),
+        GUtils = require( "ui/ui-impl/ui-utils" ),
 
         List = kity.createClass( "List", {
 
@@ -39,12 +39,12 @@ define( function ( require ) {
 
             createBox: function () {
 
-                var boxNode = $$.ele( this.doc, "div", {
+                var boxNode = GUtils.ele( this.doc, "div", {
                         className: PREFIX + "list"
                     } ),
 
                     // 创建背景
-                    bgNode = $$.ele( this.doc, "div", {
+                    bgNode = GUtils.ele( this.doc, "div", {
                         className: PREFIX + "list-bg"
                     } );
 
@@ -70,7 +70,7 @@ define( function ( require ) {
 
                 this.currentSelect = index;
 
-                $$.getClassList( this.itemGroups.items[ index ] ).add( PREFIX + "list-item-select" );
+                GUtils.getClassList( this.itemGroups.items[ index ] ).add( PREFIX + "list-item-select" );
 
                 this.onselectHandler( index, oldSelect );
 
@@ -78,7 +78,7 @@ define( function ( require ) {
 
             unselect: function ( index ) {
 
-                $$.getClassList( this.itemGroups.items[ index ] ).remove( PREFIX + "list-item-select" );
+                GUtils.getClassList( this.itemGroups.items[ index ] ).remove( PREFIX + "list-item-select" );
 
             },
 
@@ -92,7 +92,7 @@ define( function ( require ) {
                 var className = "." + PREFIX + "list-item",
                     _self = this;
 
-                $$.delegate( this.itemGroups.container, className, "mousedown", function ( e ) {
+                GUtils.delegate( this.itemGroups.container, className, "mousedown", function ( e ) {
 
                     e.preventDefault();
 
@@ -104,7 +104,7 @@ define( function ( require ) {
 
                 } );
 
-                $$.on( this.element, "mousedown", function ( e ) {
+                GUtils.on( this.element, "mousedown", function ( e ) {
 
                     e.stopPropagation();
                     e.preventDefault();
@@ -114,7 +114,7 @@ define( function ( require ) {
             },
 
             getPositionInfo: function () {
-                return $$.getRectBox( this.element );
+                return GUtils.getRectBox( this.element );
             },
 
             createItems: function () {
@@ -126,7 +126,7 @@ define( function ( require ) {
                     items = [],
                     itemContainer = null;
 
-                groupNode = $$.ele( this.doc, "div", {
+                groupNode = GUtils.ele( this.doc, "div", {
                     className: PREFIX + "list-item"
                 } );
 
@@ -141,7 +141,7 @@ define( function ( require ) {
                     iconNode.className = PREFIX + "list-item-icon";
 
                     itemNode.appendChild( iconNode );
-                    itemNode.appendChild( $$.ele( doc, "text", itemText ) );
+                    itemNode.appendChild( GUtils.ele( doc, "text", itemText ) );
 
                     itemNode.setAttribute( "data-index", i );
 
