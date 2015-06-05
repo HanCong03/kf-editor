@@ -180,6 +180,10 @@ define(function (require) {
                             item: {
                                 val: "{}^n_1Y"
                             }
+                        }, {
+                            item: {
+                                val: "10^\\circ"
+                            }
                         }]
                     }]
                 }]
