@@ -34,7 +34,7 @@ define(function (require) {
                         content: [{
                             label: "二次公式",
                             item: {
-                                val: "x=\\frac {-b\\pm\\sqrt {b^2-4ac}}{2a}"
+                                val: "x=\\dfrac {-b\\pm\\sqrt {b^2-4ac}}{2a}"
                             }
                         }, {
                             label: "二项式定理",
@@ -102,7 +102,7 @@ define(function (require) {
                         title: "分数",
                         content: [{
                             item: {
-                                val: "\\frac \\placeholder\\placeholder"
+                                val: "\\dfrac \\placeholder\\placeholder"
                             }
                         }, {
                             item: {
@@ -113,19 +113,19 @@ define(function (require) {
                         title: "常用分数",
                         content: [{
                             item: {
-                                val: "\\frac {dy}{dx}"
+                                val: "\\dfrac {dy}{dx}"
                             }
                         }, {
                             item: {
-                                val: "\\frac {\\Delta y}{\\Delta x}"
+                                val: "\\dfrac {\\Delta y}{\\Delta x}"
                             }
                         }, {
                             item: {
-                                val: "\\frac {\\delta y}{\\delta x}"
+                                val: "\\dfrac {\\delta y}{\\delta x}"
                             }
                         }, {
                             item: {
-                                val: "\\frac \\pi 2"
+                                val: "\\dfrac \\pi 2"
                             }
                         }]
                     }]
@@ -227,7 +227,7 @@ define(function (require) {
                         title: "常用根式",
                         content: [{
                             item: {
-                                val: "\\frac {-b\\pm\\sqrt{b^2-4ac}}{2a}"
+                                val: "\\dfrac {-b\\pm\\sqrt{b^2-4ac}}{2a}"
                             }
                         }, {
                             item: {
@@ -417,7 +417,7 @@ define(function (require) {
                             }
                         }, {
                             item: {
-                                val: "\\tan\\theta=\\frac {\\sin\\theta}{\\cos\\theta}"
+                                val: "\\tan\\theta=\\dfrac {\\sin\\theta}{\\cos\\theta}"
                             }
                         }]
                     }]

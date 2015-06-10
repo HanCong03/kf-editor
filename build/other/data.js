@@ -6,7 +6,7 @@
 var TOOLBAR_BASE = '../../assets/images/toolbar/';
 
 var icons = [{
-    value: "x=\\frac {-b\\pm\\sqrt {b^2-4ac}}{2a}",
+    value: "x=\\dfrac {-b\\pm\\sqrt {b^2-4ac}}{2a}",
     file: TOOLBAR_BASE + "ys/1.png"
 }, {
     value: "{\\left(x+a\\right)}^2=\\sum^n_{k=0}{\\left(^n_k\\right)x^ka^{n-k}}",
@@ -15,22 +15,22 @@ var icons = [{
     value: "a^2+b^2=c^2",
     file: TOOLBAR_BASE + "ys/3.png"
 }, {
-    value: "\\frac \\placeholder\\placeholder",
+    value: "\\dfrac \\placeholder\\placeholder",
     file: TOOLBAR_BASE + "frac/1.png"
 }, {
     value: "{\\placeholder/\\placeholder}",
     file: TOOLBAR_BASE + "frac/2.png"
 }, {
-    value: "\\frac {dy}{dx}",
+    value: "\\dfrac {dy}{dx}",
     file: TOOLBAR_BASE + "frac/c1.png"
 }, {
-    value: "\\frac {\\Delta y}{\\Delta x}",
+    value: "\\dfrac {\\Delta y}{\\Delta x}",
     file: TOOLBAR_BASE + "frac/c2.png"
 }, {
-    value: "\\frac {\\delta y}{\\delta x}",
+    value: "\\dfrac {\\delta y}{\\delta x}",
     file: TOOLBAR_BASE + "frac/c4.png"
 }, {
-    value: "\\frac \\pi 2",
+    value: "\\dfrac \\pi 2",
     file: TOOLBAR_BASE + "frac/c5.png"
 }, {
     value: "\\placeholder^\\placeholder",
@@ -69,7 +69,7 @@ var icons = [{
     value: "\\sqrt [3] \\placeholder",
     file: TOOLBAR_BASE + "sqrt/4.png"
 }, {
-    value: "\\frac {-b\\pm\\sqrt{b^2-4ac}}{2a}",
+    value: "\\dfrac {-b\\pm\\sqrt{b^2-4ac}}{2a}",
     file: TOOLBAR_BASE + "sqrt/c1.png"
 }, {
     value: "\\sqrt {a^2+b^2}",
@@ -138,7 +138,7 @@ var icons = [{
     value: "\\cos{2x}",
     file: TOOLBAR_BASE + "func/c2.png"
 }, {
-    value: "\\tan\\theta=\\frac {\\sin\\theta}{\\cos\\theta}",
+    value: "\\tan\\theta=\\dfrac {\\sin\\theta}{\\cos\\theta}",
     file: TOOLBAR_BASE + "func/c3.png"
 }, {
     value: "\\left\\{\\begin{array}{ll}\\placeholder & \\placeholder \\\\ \\placeholder & \\placeholder\\end{array}\\right.",
