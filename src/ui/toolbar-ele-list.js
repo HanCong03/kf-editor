@@ -352,13 +352,6 @@ define(function (require) {
                                 val: "\\left|\\placeholder\\right|"
                             }
                         }]
-                    }, {
-                        title: "方程组",
-                        content: [{
-                            item: {
-                                val: "\\left\\{\\begin{array}{ll}\\placeholder & \\placeholder \\\\ \\placeholder & \\placeholder\\end{array}\\right."
-                            }
-                        }]
                     }]
                 }]
             }
@@ -418,6 +411,39 @@ define(function (require) {
                         }, {
                             item: {
                                 val: "\\tan\\theta=\\dfrac {\\sin\\theta}{\\cos\\theta}"
+                            }
+                        }]
+                    }]
+                }]
+            }
+        }
+    }, {
+        type: UI_ELE_TYPE.DRAPDOWN_BOX,
+        options: {
+            button: {
+                label: "向量<br/>方程组",
+                icon: {
+                    src: "assets/images/toolbar/btn.png",
+                    x: 383,
+                    y: 0
+                }
+            },
+            box: {
+                width: 340,
+                group: [{
+                    title: "向量",
+                    items: [{
+                        title: "向量",
+                        content: [{
+                            item: {
+                                val: "\\overrightarrow{\\placeholder}"
+                            }
+                        }]
+                    }, {
+                        title: "方程组",
+                        content: [{
+                            item: {
+                                val: "\\left\\{\\begin{array}{ll}\\placeholder & \\placeholder \\\\ \\placeholder & \\placeholder\\end{array}\\right."
                             }
                         }]
                     }]

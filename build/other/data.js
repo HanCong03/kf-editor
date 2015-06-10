@@ -143,4 +143,7 @@ var icons = [{
 }, {
     value: "\\left\\{\\begin{array}{ll}\\placeholder & \\placeholder \\\\ \\placeholder & \\placeholder\\end{array}\\right.",
     file: TOOLBAR_BASE + "brackets/5.png"
+}, {
+    value: "\\overrightarrow{\\placeholder}",
+    file: TOOLBAR_BASE + "vector/1.png"
 }];
