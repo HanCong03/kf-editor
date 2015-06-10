@@ -70,6 +70,10 @@ define(function () {
         "\\tan\\theta=\\frac {\\sin\\theta}{\\cos\\theta}": {
             "pos": {"x": 3608, "y": 0},
             "size": {"width": 137, "height": 75}
+        },
+        "\\left\\{\\begin{array}{ll}\\placeholder & \\placeholder \\\\ \\placeholder & \\placeholder\\end{array}\\right.": {
+            "pos": {"x": 3750, "y": 0},
+            "size": {"width": 160, "height": 75}
         }
     };
 

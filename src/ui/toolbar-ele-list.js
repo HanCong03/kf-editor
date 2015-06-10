@@ -352,6 +352,13 @@ define(function (require) {
                                 val: "\\left|\\placeholder\\right|"
                             }
                         }]
+                    }, {
+                        title: "方程组",
+                        content: [{
+                            item: {
+                                val: "\\left\\{\\begin{array}{ll}\\placeholder & \\placeholder \\\\ \\placeholder & \\placeholder\\end{array}\\right."
+                            }
+                        }]
                     }]
                 }]
             }

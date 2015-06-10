@@ -140,4 +140,7 @@ var icons = [{
 }, {
     value: "\\tan\\theta=\\frac {\\sin\\theta}{\\cos\\theta}",
     file: TOOLBAR_BASE + "func/c3.png"
+}, {
+    value: "\\left\\{\\begin{array}{ll}\\placeholder & \\placeholder \\\\ \\placeholder & \\placeholder\\end{array}\\right.",
+    file: TOOLBAR_BASE + "brackets/5.png"
 }];
