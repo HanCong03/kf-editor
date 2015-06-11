@@ -6,11 +6,14 @@ define( function ( require, exports, module ) {
 
     var kity = require( "kity" ),
         kfUtils = require( "base/utils" ),
+        CONF = require( "sysconf" ),
+        CURSOR_CHAR = CONF.cursorCharacter,
         InputFilter = require( "control/input-filter" ),
         KEY_CODE = {
             LEFT: 37,
             RIGHT: 39,
             DELETE: 8,
+            ENTER: 13,
             // 输入法特殊处理
             INPUT: 229
         };
@@ -164,6 +167,11 @@ define( function ( require, exports, module ) {
                         isControl = true;
                         break;
 
+                    case KEY_CODE.ENTER:
+                        e.preventDefault();
+                        _self.newLine();
+                        isControl = true;
+                        break;
                 }
 
                 if ( isControl ) {
@@ -312,6 +320,85 @@ define( function ( require, exports, module ) {
 
             this.kfEditor.requestService( "render.draw", latexStr );
             this.kfEditor.requestService( "control.reselect" );
+
+        },
+
+        newLine: function () {
+
+            var latexInfo = this.kfEditor.requestService( "syntax.serialization" ),
+                match = null,
+                source = null,
+                index = 0,
+                pattern = /\\begin\{([^}]+)\}[\s\S]*?\\end\{\1\}/ig,
+                rootShape = null,
+                beginType = null,
+                content = null,
+                originString = latexInfo.str;
+
+            while ( match = pattern.exec( originString ) ) {
+
+                index = match.index;
+
+                beginType = match[1];
+                match = match[0];
+
+                if ( match.indexOf( CURSOR_CHAR ) === -1 ) {
+                    match = null;
+                    continue;
+                } else {
+                    break;
+                }
+
+            }
+
+            if ( !match ) {
+                return;
+            }
+
+            source = originString.substring( index, match.length + index );
+
+            source = source.replace( "\\begin{"+ beginType +"}", "" ).replace( "\\end{"+ beginType +"}", "" );
+
+            source = source.split( "\\\\" );
+
+            for ( var i = 0, len = source.length; i < len; i++ ) {
+
+                if ( source[ i ].indexOf( CURSOR_CHAR ) !== -1 ) {
+
+                    if ( beginType === 'split' ) {
+                        source[ i ] = source[ i ].replace( CURSOR_CHAR, "" ).replace( CURSOR_CHAR, "" );
+                        source.splice( i+1, 0, "&{" + CURSOR_CHAR + " \\placeholder "+ CURSOR_CHAR + "}" );
+                        break;
+                    } else {
+                        content = source[i];
+                        source[ i ] = source[ i ].replace( CURSOR_CHAR, "" ).replace( CURSOR_CHAR, "" );
+
+                        content = content.split( "&" );
+
+                        for ( var j = 0, jlen = content.length; j < jlen; j++ ) {
+                            if ( content[j].indexOf( CURSOR_CHAR ) !== -1 ) {
+                                content[ j ] = CURSOR_CHAR + " \\placeholder "+ CURSOR_CHAR;
+                            } else {
+                                content[ j ] = "\\placeholder";
+                            }
+                        }
+
+                        source.splice( i+1, 0, content.join( "&" ) );
+                        break;
+                    }
+
+                }
+
+            }
+
+            source = "\\begin{"+ beginType +"}" + source.join( "\\\\" ) + "\\end{"+ beginType +"}";
+
+            originString = originString.substring( 0, index ) + source + originString.substring( index + match.length );
+            this.inputBox.value = originString;
+            this.inputBox.selectionStart = originString.indexOf( CURSOR_CHAR );
+            this.inputBox.selectionEnd = originString.lastIndexOf( CURSOR_CHAR );
+
+            this.processingInput();
 
         },
 
