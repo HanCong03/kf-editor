@@ -443,7 +443,7 @@ define(function (require) {
                         title: "方程组",
                         content: [{
                             item: {
-                                val: "\\left\\{\\begin{array}{ll}\\placeholder & \\placeholder \\\\ \\placeholder & \\placeholder\\end{array}\\right."
+                                val: "\\left\\{\\begin{array}{ll}\\placeholder \\\\ \\placeholder\\end{array}\\right."
                             }
                         }]
                     }]

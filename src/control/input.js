@@ -283,6 +283,11 @@ define(function (require, exports, module) {
                     //this.kfEditor.requestService( "print.image" );
                     break;
 
+                // ctrl + z
+                case 90:
+                    e.preventDefault();
+                    break;
+
             }
 
         },

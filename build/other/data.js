@@ -141,8 +141,8 @@ var icons = [{
     value: "\\tan\\theta=\\dfrac {\\sin\\theta}{\\cos\\theta}",
     file: TOOLBAR_BASE + "func/c3.png"
 }, {
-    value: "\\left\\{\\begin{array}{ll}\\placeholder & \\placeholder \\\\ \\placeholder & \\placeholder\\end{array}\\right.",
-    file: TOOLBAR_BASE + "brackets/5.png"
+    value: "\\left\\{\\begin{array}{ll}\\placeholder \\\\ \\placeholder\\end{array}\\right.",
+    file: TOOLBAR_BASE + "vector/2.png"
 }, {
     value: "\\overrightarrow{\\placeholder}",
     file: TOOLBAR_BASE + "vector/1.png"

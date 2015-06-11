@@ -2,13 +2,13 @@
  * 删除控制
  */
 
-define( function ( require, exports, module ) {
+define(function (require, exports, module) {
 
-    var kity = require( "kity" );
+    var kity = require("kity");
 
-    return kity.createClass( "DeleteComponent", {
+    return kity.createClass("DeleteComponent", {
 
-        constructor: function ( parentComponent, kfEditor ) {
+        constructor: function (parentComponent, kfEditor) {
 
             this.parentComponent = parentComponent;
             this.kfEditor = kfEditor;
@@ -19,34 +19,34 @@ define( function ( require, exports, module ) {
 
             var cursorInfo = this.parentComponent.getCursorRecord(),
                 objTree = this.parentComponent.getObjectTree(),
-                // 当前的树信息
-                currentTree = objTree.mapping[ cursorInfo.groupId ].strGroup;
+            // 当前的树信息
+                currentTree = objTree.mapping[cursorInfo.groupId].strGroup;
 
             // 选区长度为0, 则删除前一个组
-            if ( cursorInfo.startOffset === cursorInfo.endOffset ) {
+            if (cursorInfo.startOffset === cursorInfo.endOffset) {
 
                 // 已经到最前， 需要进一步处理
-                if ( cursorInfo.startOffset === 0 ) {
+                if (cursorInfo.startOffset === 0) {
 
                     // 根节点时， 直接退出， 不做任何处理
-                    if ( this.parentComponent.isRootTree( currentTree ) ) {
+                    if (this.parentComponent.isRootTree(currentTree)) {
                         return false;
                     }
 
                     // 不是根节点时， 选中当前容器的父容器
-                    cursorInfo = this.selectParentContainer( cursorInfo.groupId );
-                    this.parentComponent.updateCursor( cursorInfo );
+                    cursorInfo = this.selectParentContainer(cursorInfo.groupId);
+                    this.parentComponent.updateCursor(cursorInfo);
 
                     return false;
 
                 } else {
 
                     // 还有更多剩余内容， 则直接删除前一个组
-                    if ( currentTree.operand.length > 1 ) {
+                    if (currentTree.operand.length > 1) {
 
-                        cursorInfo = this.deletePrevGroup( currentTree, cursorInfo );
+                        cursorInfo = this.deletePrevGroup(currentTree, cursorInfo);
 
-                    // 仅有一个需要删除的组存在时的处理
+                        // 仅有一个需要删除的组存在时的处理
                     } else {
 
                         // 更新光标位置
@@ -54,21 +54,21 @@ define( function ( require, exports, module ) {
                         cursorInfo.endOffset = 1;
 
                         // 处理组类型， 选中该组即可
-                        if ( currentTree.operand[ 0 ].attr && this.parentComponent.isGroupNode( currentTree.operand[ 0 ].attr.id ) ) {
+                        if (currentTree.operand[0].attr && this.parentComponent.isGroupNode(currentTree.operand[0].attr.id)) {
 
-                            this.parentComponent.updateCursor( cursorInfo );
+                            this.parentComponent.updateCursor(cursorInfo);
 
                             return false;
 
-                        // 普通元素处理
+                            // 普通元素处理
                         } else {
 
                             // 替换成占位符
-                            currentTree.operand[ 0 ] = {
+                            currentTree.operand[0] = {
                                 name: "placeholder",
                                 operand: []
                             };
-                            this.parentComponent.updateCursor( cursorInfo );
+                            this.parentComponent.updateCursor(cursorInfo);
 
                             return true;
 
@@ -78,90 +78,90 @@ define( function ( require, exports, module ) {
 
                 }
 
-            // 当前是选区
+                // 当前是选区
             } else {
 
                 // 当前选中占位符的情况
-                if ( this.parentComponent.isSelectPlaceholder() ) {
+                if (this.parentComponent.isSelectPlaceholder()) {
 
                     // 如果是根节点， 则不允许删除
-                    if ( this.parentComponent.isRootTree( currentTree ) ) {
+                    if (this.parentComponent.isRootTree(currentTree)) {
 
                         return false;
 
-                    // 否则，更新选区到选中该容器
+                        // 否则，更新选区到选中该容器
                     } else {
 
-                        cursorInfo = this.selectParentContainer( cursorInfo.groupId );
+                        cursorInfo = this.selectParentContainer(cursorInfo.groupId);
 
-                        this.parentComponent.updateCursor( cursorInfo );
+                        this.parentComponent.updateCursor(cursorInfo);
 
                         return false;
 
                     }
 
-                // 其他选区正常删除
+                    // 其他选区正常删除
                 } else {
 
-                    var tmpCursorInfo = this.selectParentContainer( cursorInfo.groupId ),
+                    var tmpCursorInfo = this.selectParentContainer(cursorInfo.groupId),
                         isPlaceholder = false,
                         tmpCurrentTree = null,
-                        tmpTree = objTree.mapping[ tmpCursorInfo.groupId ].strGroup;
+                        tmpTree = objTree.mapping[tmpCursorInfo.groupId].strGroup;
 
                     // cases语句删除
-                    if ( tmpTree.name === "cases" ) {
+                    if (tmpTree.name === "cases") {
 
-                        tmpCurrentTree = tmpTree.operand[ tmpCursorInfo.startOffset ];
+                        tmpCurrentTree = tmpTree.operand[tmpCursorInfo.startOffset];
 
-                        while ( tmpCurrentTree.operand && tmpCurrentTree.operand.length > 0 ) {
+                        while (tmpCurrentTree.operand && tmpCurrentTree.operand.length > 0) {
 
-                            isPlaceholder = tmpCurrentTree.operand[ 0 ].name === "placeholder";
+                            isPlaceholder = tmpCurrentTree.operand[0].name === "placeholder";
 
-                            if ( isPlaceholder ) {
+                            if (isPlaceholder) {
                                 break;
                             }
 
-                            tmpCurrentTree = tmpCurrentTree.operand[ 0 ];
+                            tmpCurrentTree = tmpCurrentTree.operand[0];
 
                         }
 
-                        if ( isPlaceholder ) {
+                        if (isPlaceholder) {
 
                             // 选中整个表达式
-                            if ( tmpTree.operand.length === 1 ) {
-                                tmpCursorInfo = this.selectParentContainer( cursorInfo.groupId );
-                                tmpCursorInfo = this.selectParentContainer( tmpCursorInfo.groupId );
-                                this.parentComponent.updateCursor( tmpCursorInfo );
+                            if (tmpTree.operand.length === 1) {
+                                tmpCursorInfo = this.selectParentContainer(cursorInfo.groupId);
+                                tmpCursorInfo = this.selectParentContainer(tmpCursorInfo.groupId);
+                                this.parentComponent.updateCursor(tmpCursorInfo);
                                 return false;
                             }
 
-                            tmpTree.operand.splice( tmpCursorInfo.startOffset, 1 );
+                            tmpTree.operand.splice(tmpCursorInfo.startOffset, 1);
 
-                            if ( tmpCursorInfo.startOffset > 0 ) {
+                            if (tmpCursorInfo.startOffset > 0) {
                                 tmpCursorInfo.startOffset -= 1;
                                 tmpCursorInfo.endOffset -= 1;
                             }
 
-                            this.parentComponent.updateCursor( tmpCursorInfo );
+                            this.parentComponent.updateCursor(tmpCursorInfo);
 
                             return true;
 
                         } else {
-                            return this.deleteSelection( currentTree, cursorInfo );
+                            return this.deleteSelection(currentTree, cursorInfo);
                         }
 
                     }
 
-                    return this.deleteSelection( currentTree, cursorInfo );
+                    return this.deleteSelection(currentTree, cursorInfo);
 
                 }
 
             }
 
-            this.parentComponent.updateCursor( cursorInfo );
+            this.parentComponent.updateCursor(cursorInfo);
 
             // 选区长度为0， 则可以判定当前公式发生了改变
-            if ( cursorInfo.startOffset === cursorInfo.endOffset ) {
+            if (cursorInfo.startOffset === cursorInfo.endOffset) {
                 return true;
             }
 
@@ -170,20 +170,20 @@ define( function ( require, exports, module ) {
         },
 
         // 删除前一个节点, 返回更新后的光标信息
-        deletePrevGroup: function ( tree, cursorInfo ) {
+        deletePrevGroup: function (tree, cursorInfo) {
 
             // 待删除的组
             var index = cursorInfo.startOffset - 1,
-                group = tree.operand[ index ];
+                group = tree.operand[index];
 
             // 叶子节点可以直接删除
-            if ( this.parentComponent.isLeafTree( group ) ) {
+            if (this.parentComponent.isLeafTree(group)) {
 
-                tree.operand.splice( index, 1 );
+                tree.operand.splice(index, 1);
                 cursorInfo.startOffset -= 1;
                 cursorInfo.endOffset -= 1;
 
-            // 否则， 选中该节点
+                // 否则， 选中该节点
             } else {
 
                 cursorInfo.startOffset -= 1;
@@ -195,43 +195,49 @@ define( function ( require, exports, module ) {
         },
 
         // 删除选区内容
-        deleteSelection: function ( tree, cursorInfo ) {
+        deleteSelection: function (tree, cursorInfo) {
 
             // 选中的是容器内的所有内容
-            if ( cursorInfo.startOffset === 0 && cursorInfo.endOffset === tree.operand.length ) {
+            if (cursorInfo.startOffset === 0 && cursorInfo.endOffset === tree.operand.length) {
 
                 tree.operand.length = 1;
 
-                tree.operand[ 0 ] = {
+                tree.operand[0] = {
                     name: "placeholder",
                     operand: []
                 };
 
                 cursorInfo.endOffset = 1;
 
-            // 否则可以删除当前选中内容
+                // 否则可以删除当前选中内容
             } else {
-                tree.operand.splice( cursorInfo.startOffset, cursorInfo.endOffset - cursorInfo.startOffset );
+                tree.operand.splice(cursorInfo.startOffset, cursorInfo.endOffset - cursorInfo.startOffset);
                 cursorInfo.endOffset = cursorInfo.startOffset;
             }
 
-            this.parentComponent.updateCursor( cursorInfo );
+            this.parentComponent.updateCursor(cursorInfo);
 
             return true;
 
         },
 
         // 选中给定ID节点的父容器
-        selectParentContainer: function ( groupId ) {
+        selectParentContainer: function (groupId) {
 
-            if ( this.parentComponent.isRootNode( groupId ) ) {
+            if (this.parentComponent.isRootNode(groupId)) {
                 return this.parentComponent.getCursorRecord();
             }
 
-            var currentGroupNode = this.parentComponent.getGroupObject( groupId ).node,
-                parentContainerInfo = this.kfEditor.requestService( "position.get.group", currentGroupNode ),
-                // 当前组在父容器中的索引
-                index = this.kfEditor.requestService( "position.get.index", parentContainerInfo.groupObj, currentGroupNode );
+            var currentGroupNode = this.parentComponent.getGroupObject(groupId).node,
+                parentContainerInfo = this.kfEditor.requestService("position.get.group", currentGroupNode),
+            // 当前组在父容器中的索引
+                index = this.kfEditor.requestService("position.get.index", parentContainerInfo.groupObj, currentGroupNode);
+
+            // 数组特殊处理
+            if (parentContainerInfo.groupObj.getAttribute('data-flag') === 'Array') {
+                parentContainerInfo = this.kfEditor.requestService("position.get.group", parentContainerInfo.groupObj);
+                return this.selectParentContainer(parentContainerInfo.id);
+            }
 
             // 返回新的光标信息
             return {
@@ -242,7 +248,7 @@ define( function ( require, exports, module ) {
 
         }
 
-    } );
+    });
 
 
-} );
+});
